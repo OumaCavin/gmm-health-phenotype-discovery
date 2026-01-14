@@ -167,19 +167,18 @@ print(REFERENCES)
 # ============================================================================
 
 """
-For this project, we will use the Behavioral Risk Factor Surveillance System (BRFSS) 
-dataset. The BRFSS is the nation's premier system of health-related telephone surveys 
-that collect state data about U.S. residents regarding their health-related risk behaviors, 
-chronic health conditions, and use of preventive services.
+For this project, we will use the National Health and Nutrition Examination Survey (NHANES) 
+dataset. The NHANES is a program of studies designed to assess the health and nutritional 
+status of adults and children in the United States combining interviews and physical examinations.
 
-Dataset Source: IEEE Dataport / CDC BRFSS
-The BRFSS contains comprehensive health data including:
+Dataset Source: CDC NHANES
+The NHANES contains comprehensive health data including:
 - Demographic characteristics
 - Health status indicators
-- Risk behaviors (smoking, alcohol use, physical activity)
-- Chronic conditions (diabetes, heart disease, asthma)
-- Healthcare access and utilization
-- Preventive health practices
+- Body measures and laboratory tests
+- Dietary information and nutritional status
+- Chronic conditions and medical history
+- Behavioral factors and lifestyle
 """
 
 # ============================================================================
@@ -245,7 +244,7 @@ def download_data(url, output_path):
 def generate_synthetic_health_data(n_samples=3000):
     """
     Generate synthetic public health dataset for demonstration purposes.
-    This simulates BRFSS-like data with realistic health indicators.
+    This simulates NHANES-like data with realistic health indicators.
     
     Parameters:
     -----------
@@ -1592,7 +1591,7 @@ print("""
    - Explore deep embedding for high-dimensional health data
 
 2. Validation Studies
-   - External validation with real BRFSS or NHANES data
+   - External validation with real NHANES data
    - Clinical validation against established risk scores
    - Longitudinal analysis to assess cluster stability over time
 
