@@ -17,5 +17,8 @@ scikit-learn>=1.0.0
 joblib>=1.0.0
 jupyter>=1.0.0
 
+# Web Application
+streamlit>=1.28.0
+
 # Optional: For advanced visualizations
 plotly>=5.0.0
