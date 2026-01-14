@@ -3,8 +3,15 @@
 <div align="center">
 
 **MSc Public Health Data Science - SDS6217 Advanced Machine Learning**  
-**Student ID:** SDS6/46982/2025  
-**Author:** Cavin Otieno  
+
+**Group 6 Members:**
+| Student ID | Student Name |
+|------------|--------------|
+| SDS6/46982/2024 | Cavin Otieno |
+| SDS6/46284/2024 | Joseph Ongoro Marindi |
+| SDS6/47543/2024 | Laura Nabalayo Kundu |
+| SDS6/47545/2024 | Nevin Khaemba |
+
 **Date:** January 2025  
 **Institution:** University of Nairobi
 
@@ -16,14 +23,17 @@
 
 1. [Project Overview](#project-overview)
 2. [Dataset Description](#dataset-description)
-3. [Methodology](#methodology)
-4. [Project Structure](#project-structure)
-5. [Installation and Setup](#installation-and-setup)
-6. [Usage Guide](#usage-guide)
-7. [Path Management System](#path-management-system)
-8. [Output Files](#output-files)
-9. [Key Findings](#key-findings)
-10. [References](#references)
+3. [Data Dictionary](#data-dictionary)
+4. [Methodology](#methodology)
+5. [Hyperparameter Tuning](#hyperparameter-tuning)
+6. [Project Structure](#project-structure)
+7. [Installation and Setup](#installation-and-setup)
+8. [Usage Guide](#usage-guide)
+9. [Path Management System](#path-management-system)
+10. [Output Files](#output-files)
+11. [Interactive Streamlit App](#interactive-streamlit-app)
+12. [Key Findings](#key-findings)
+13. [References](#references)
 
 ---
 
@@ -49,22 +59,15 @@ This project applies Gaussian Mixture Models (GMM) to identify latent subpopulat
 ## Dataset Description
 
 **Source:** National Health and Nutrition Examination Survey (NHANES)  
+**Source Organization:** Centers for Disease Control and Prevention (CDC), National Center for Health Statistics (NCHS)  
+**Source URL:** https://www.cdc.gov/nchs/nhanes/  
 **Location:** `data/raw/nhanes_health_data.csv`  
 **Samples:** 5,000 adult respondents  
 **Variables:** 47 health indicators
 
-### Variable Categories
+### Data Collection Methodology
 
-| Category | Variables | Description |
-|----------|-----------|-------------|
-| **Demographics** | 5 | sex, age, race/ethnicity, education, income |
-| **Body Measures** | 4 | weight, height, BMI, waist circumference |
-| **Blood Pressure** | 2 | systolic BP, diastolic BP |
-| **Laboratory** | 5 | total cholesterol, HDL, LDL, glucose, insulin |
-| **Behavioral** | 6 | smoking, alcohol, physical activity levels |
-| **Medical Conditions** | 8 | arthritis, heart disease, stroke, etc. |
-| **Mental Health** | 10 | PHQ-9 depression screening items |
-| **Derived Features** | 4 | clinical category assignments |
+NHANES combines interviews and physical examinations to assess the health and nutritional status of adults and children in the United States. The survey is conducted by the National Center for Health Statistics (NCHS), part of the CDC.
 
 ### Data Quality
 
@@ -74,36 +77,158 @@ This project applies Gaussian Mixture Models (GMM) to identify latent subpopulat
 
 ---
 
+## Data Dictionary
+
+### Complete Variable Documentation with Source References
+
+#### 1. Demographics (5 Variables)
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `sex` | Biological sex of respondent | 0=Female, 1=Male | NHANES Demographics Questionnaire |
+| `age` | Age at screening | Years (20-80) | NHANES Demographics Questionnaire |
+| `race_ethnicity` | Race/ethnicity category | 1-5 (5-level classification) | NHANES Demographics Questionnaire |
+| `education_level` | Education level completed | 1-5 (less than 9th grade to graduate) | NHANES Demographics Questionnaire |
+| `income_category` | Annual household income | 1-20 (20 income brackets) | NHANES Demographics Questionnaire |
+
+**Source Reference:** NHANES Demographics Module. (2023). Centers for Disease Control and Prevention. https://www.cdc.gov/nchs/nhanes/
+
+#### 2. Body Measures (4 Variables)
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `weight_kg` | Body weight | Kilograms | NHANES Physical Examination (Exam Component) |
+| `height_cm` | Standing height | Centimeters | NHANES Physical Examination |
+| `bmi` | Body Mass Index | kg/m² (10-60) | Calculated from weight and height |
+| `waist_circumference_cm` | Waist circumference | Centimeters | NHANES Physical Examination |
+
+**Source Reference:** NHANES Anthropometry Manual. (2023). Centers for Disease Control and Prevention. https://www.cdc.gov/nchs/nhanes/
+
+#### 3. Blood Pressure (2 Variables)
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `systolic_bp_mmHg` | Systolic blood pressure | mmHg (70-200) | NHANES Physical Examination |
+| `diastolic_bp_mmHg` | Diastolic blood pressure | mmHg (40-120) | NHANES Physical Examination |
+
+**Source Reference:** NHANES Blood Pressure Procedures Manual. (2023). Centers for Disease Control and Prevention. https://www.cdc.gov/nchs/nhanes/
+
+#### 4. Laboratory Measures (5 Variables)
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `total_cholesterol_mg_dL` | Total cholesterol | mg/dL (100-400) | NHANES Laboratory Component |
+| `hdl_cholesterol_mg_dL` | High-density lipoprotein cholesterol | mg/dL (20-100) | NHANES Laboratory Component |
+| `ldl_cholesterol_mg_dL` | Low-density lipoprotein cholesterol | mg/dL (30-250) | NHANES Laboratory Component |
+| `fasting_glucose_mg_dL` | Fasting plasma glucose | mg/dL (50-300) | NHANES Laboratory Component |
+| `insulin_uU_mL` | Fasting insulin | μU/mL | NHANES Laboratory Component |
+
+**Source Reference:** NHANES Laboratory Procedures Manual. (2023). Centers for Disease Control and Prevention. https://www.cdc.gov/nchs/nhanes/
+
+#### 5. Behavioral Factors (8 Variables)
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `smoked_100_cigarettes` | Ever smoked 100 cigarettes | 0=No, 1=Yes | NHANES Smoking Questionnaire |
+| `cigarettes_per_day` | Cigarettes smoked per day | 0-99 | NHANES Smoking Questionnaire |
+| `alcohol_use_past_year` | Alcohol use in past year | 0=No, 1=Yes | NHANES Alcohol Questionnaire |
+| `drinks_per_week` | Average drinks per week | 0-50 | NHANES Alcohol Questionnaire |
+| `vigorous_work_activity` | Vigorous work activity (days/week) | 0-7 | NHANES Physical Activity Questionnaire |
+| `moderate_work_activity` | Moderate work activity (days/week) | 0-7 | NHANES Physical Activity Questionnaire |
+| `vigorous_recreation_activity` | Vigorous recreational activity (days/week) | 0-7 | NHANES Physical Activity Questionnaire |
+| `moderate_recreation_activity` | Moderate recreational activity (days/week) | 0-7 | NHANES Physical Activity Questionnaire |
+
+**Source Reference:** NHANES Smoking Questionnaire, Alcohol Questionnaire, and Physical Activity Questionnaire. (2023). Centers for Disease Control and Prevention. https://www.cdc.gov/nchs/nhanes/
+
+#### 6. Medical Conditions (8 Variables)
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `general_health_rating` | General health self-rating | 1-5 (Excellent to Poor) | NHANES Health Status Questionnaire |
+| `arthritis` | Ever told had arthritis | 0=No, 1=Yes | NHANES Medical Conditions Questionnaire |
+| `heart_failure` | Ever told had heart failure | 0=No, 1=Yes | NHANES Medical Conditions Questionnaire |
+| `coronary_heart_disease` | Ever told had coronary heart disease | 0=No, 1=Yes | NHANES Medical Conditions Questionnaire |
+| `angina_pectoris` | Ever told had angina/angina pectoris | 0=No, 1=Yes | NHANES Medical Conditions Questionnaire |
+| `heart_attack` | Ever told had heart attack (myocardial infarction) | 0=No, 1=Yes | NHANES Medical Conditions Questionnaire |
+| `stroke` | Ever told had stroke | 0=No, 1=Yes | NHANES Medical Conditions Questionnaire |
+| `cancer_diagnosis` | Ever told had cancer or malignancy | 0=No, 1=Yes | NHANES Medical Conditions Questionnaire |
+
+**Source Reference:** NHANES Medical Conditions Questionnaire. (2023). Centers for Disease Control and Prevention. https://www.cdc.gov/nchs/nhanes/
+
+#### 7. Mental Health - PHQ-9 (10 Variables)
+
+The PHQ-9 is a validated depression screening instrument based on the DSM-IV criteria.
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `phq9_little_interest` | Little interest in doing things (past 2 weeks) | 0-3 | PHQ-9 Depression Screen |
+| `phq9_feeling_down` | Feeling down, depressed, or hopeless (past 2 weeks) | 0-3 | PHQ-9 Depression Screen |
+| `phq9_sleep_trouble` | Trouble falling or staying asleep, or sleeping too much | 0-3 | PHQ-9 Depression Screen |
+| `phq9_feeling_tired` | Feeling tired or having little energy | 0-3 | PHQ-9 Depression Screen |
+| `phq9_poor_appetite` | Poor appetite or overeating | 0-3 | PHQ-9 Depression Screen |
+| `phq9_feeling_bad_about_self` | Feeling bad about yourself or that you are a failure | 0-3 | PHQ-9 Depression Screen |
+| `phq9_trouble_concentrating` | Trouble concentrating on things | 0-3 | PHQ-9 Depression Screen |
+| `phq9_moving_speaking` | Moving or speaking slowly, or being fidgety/restless | 0-3 | PHQ-9 Depression Screen |
+| `phq9_suicidal_thoughts` | Thoughts that you would be better off dead | 0-3 | PHQ-9 Depression Screen |
+| `phq9_total_score` | Total PHQ-9 score (sum of 9 items) | 0-27 | Calculated |
+
+**Source Reference:** Kroenke, K., Spitzer, R. L., & Williams, J. B. (2001). The PHQ-9: Validity of a brief depression severity measure. Journal of General Internal Medicine, 16(9), 606-613. https://www.cdc.gov/nchs/nhanes/
+
+#### 8. Derived Features (4 Variables)
+
+| Variable Name | Description | Unit/Range | Source |
+|---------------|-------------|------------|--------|
+| `cardiovascular_risk_score` | Calculated cardiovascular risk | Derived | Derived from pooled cohort equations |
+| `metabolic_syndrome_indicator` | Metabolic syndrome status | 0=No, 1=Yes | ATP III criteria |
+| `health_category` | Overall health category | 1-4 | Derived from multiple indicators |
+| `risk_level` | Risk stratification level | 1-3 (Low, Medium, High) | Derived composite score |
+
+**Source Reference:** Grundy, S. M., et al. (2005). Diagnosis and management of the metabolic syndrome. Circulation, 112(17), 2735-2752.
+
+---
+
 ## Methodology
 
 ### Gaussian Mixture Models (GMM)
 
 GMM is a probabilistic clustering algorithm that models data as a mixture of multiple Gaussian distributions. Unlike K-Means which assigns each point to a single cluster, GMM provides soft assignments based on posterior probabilities.
 
-#### Key Advantages for Public Health
+**Theoretical Foundation:** GMM assumes that the data is generated from a mixture of K Gaussian distributions, where each distribution represents a cluster. The model learns the parameters (mean, covariance, and mixing weight) of each distribution using the Expectation-Maximization (EM) algorithm.
+
+**Why GMM for Public Health:**
 
 1. **Probabilistic Cluster Assignment**: Each individual receives a probability of belonging to each cluster
 2. **Population Heterogeneity**: Captures continuous distributions of risk factors
 3. **Flexible Covariance Structures**: Four types (full, tied, diag, spherical) for different cluster shapes
 4. **Uncertainty Quantification**: Confidence in cluster assignments for clinical decision-making
 
-### Hyperparameter Tuning
-
-The following hyperparameters are optimized through grid search:
-
-| Parameter | Description | Search Space |
-|-----------|-------------|--------------|
-| n_components | Number of clusters | 2-10 |
-| covariance_type | Covariance structure | full, tied, diag, spherical |
-| reg_covar | Regularization term | 1e-6, 1e-5, 1e-4 |
-| max_iter | Maximum iterations | 100, 200, 500 |
-| n_init | Initializations | 5, 10, 20 |
-
 ### Model Selection Criteria
 
-- **BIC (Bayesian Information Criterion)**: Primary selection criterion
-- **AIC (Akaike Information Criterion)**: Secondary validation
-- **Silhouette Score**: Cluster cohesion and separation quality
+| Criterion | Description | Selection Rule |
+|-----------|-------------|----------------|
+| **BIC** | Bayesian Information Criterion | Lower is better - primary criterion |
+| **AIC** | Akaike Information Criterion | Lower is better - secondary validation |
+| **Silhouette Score** | Cluster cohesion and separation | Higher is better (-1 to 1) |
+
+---
+
+## Hyperparameter Tuning
+
+The following hyperparameters are optimized through exhaustive grid search:
+
+| Parameter | Description | Search Space | Justification |
+|-----------|-------------|--------------|---------------|
+| `n_components` | Number of clusters | 2-10 | Evaluates different population strata |
+| `covariance_type` | Covariance structure | full, tied, diag, spherical | Tests different cluster shapes |
+| `reg_covar` | Regularization term | 1e-6, 1e-5, 1e-4 | Prevents singular covariance matrices |
+| `max_iter` | Maximum iterations | 100, 200, 500 | Ensures algorithm convergence |
+| `n_init` | Initializations | 5, 10, 20 | Avoids local optima |
+
+### Grid Search Configuration
+
+- **Total Combinations:** 4 × 4 × 3 × 3 × 3 = 432 configurations
+- **Evaluation Metric:** BIC (primary), AIC (secondary)
+- **Validation:** 5-fold cross-validation
 
 ---
 
@@ -111,14 +236,15 @@ The following hyperparameters are optimized through grid search:
 
 ```
 gmm-health-phenotype-discovery/
-├── GMM_Health_Phenotype_Discovery.ipynb    # Main analysis notebook
+├── GMM_Health_Phenotype_Discovery.ipynb    # Main analysis notebook (12 phases)
 ├── GMM_Health_Phenotype_Discovery.py       # Standalone Python script
-├── README.md                                # Project overview
-├── requirements.txt                         # Python dependencies
-├── .gitignore                               # Git ignore rules
-├── LICENSE                                  # MIT License
+├── app.py                                  # Streamlit interactive web app
+├── README.md                               # Project overview
+├── requirements.txt                        # Python dependencies
+├── .gitignore                              # Git ignore rules
+├── LICENSE                                 # MIT License
 ├── docs/
-│   └── project_documentation.md            # This documentation
+│   └── project_documentation.md            # Comprehensive documentation
 ├── data/
 │   └── raw/
 │       └── nhanes_health_data.csv          # NHANES dataset (5000 samples, 47 vars)
@@ -129,8 +255,7 @@ gmm-health-phenotype-discovery/
 │   ├── cluster_profiles/                   # Cluster characteristic profiles
 │   └── logs/                               # Execution logs
 ├── models/
-│   ├── gmm_clustering/                     # Trained GMM models
-│   └── scalers/                            # Data scalers
+│   └── gmm_clustering/                     # Trained GMM models
 └── figures/
     └── plots/                              # Visualization outputs
 ```
@@ -147,29 +272,26 @@ gmm-health-phenotype-discovery/
 
 ### Installation Steps
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/OumaCavin/gmm-health-phenotype-discovery.git
-   cd gmm-health-phenotype-discovery
-   ```
+```bash
+# Clone the Repository
+git clone https://github.com/OumaCavin/gmm-health-phenotype-discovery.git
+cd gmm-health-phenotype-discovery
 
-2. **Create Virtual Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   # or
-   .\venv\Scripts\activate   # Windows
-   ```
+# Create Virtual Environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+.\venv\Scripts\activate   # Windows
 
-3. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Install Dependencies
+pip install -r requirements.txt
 
-4. **Launch Jupyter Notebook**
-   ```bash
-   jupyter notebook GMM_Health_Phenotype_Discovery.ipynb
-   ```
+# Launch Jupyter Notebook
+jupyter notebook GMM_Health_Phenotype_Discovery.ipynb
+
+# Launch Streamlit App (in separate terminal)
+streamlit run app.py
+```
 
 ---
 
@@ -206,8 +328,6 @@ This project implements a comprehensive path management system to ensure all out
 
 ### Path Configuration
 
-All paths are centralized in the PROJECT CONFIGURATION cell:
-
 ```python
 # Main directories
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
@@ -227,35 +347,11 @@ PHASE_DIRS = {
 
 ### Saving Utilities
 
-The project includes standardized saving functions:
-
 | Function | Purpose | Location |
 |----------|---------|----------|
 | `save_fig()` | Save figures in multiple formats | `figures/plots/` |
 | `save_model()` | Persist trained models | `models/gmm_clustering/` |
 | `save_data()` | Export data to CSV | `output_v2/subdirectories/` |
-
-### Figure Display and Saving
-
-All visualization cells follow this pattern:
-
-```python
-# Create figure
-fig, ax = plt.subplots(figsize=(10, 6))
-# ... plotting code ...
-plt.tight_layout()
-
-# Display figure
-plt.show()
-
-# Save to persistent path
-save_fig(fig, 'figure_name', subdir='plots')
-```
-
-This ensures:
-1. Figures are displayed in the notebook
-2. Figures are saved to persistent storage
-3. Outputs survive kernel restarts
 
 ---
 
@@ -292,14 +388,38 @@ After running the full notebook, the following files are generated:
 
 ---
 
+## Interactive Streamlit App
+
+The project includes an interactive Streamlit web application (`app.py`) for real-time predictions.
+
+### App Features
+
+| Tab | Feature | Description |
+|-----|---------|-------------|
+| Tab 1 | 🔮 Predict Cluster | Interactive health parameter input and prediction |
+| Tab 2 | 📈 Cluster Profiles | Visualize and compare cluster characteristics |
+| Tab 3 | 📊 Model Performance | Display BIC, AIC, and Silhouette scores |
+| Tab 4 | ℹ️ About | Project and team information |
+| Tab 5 | 📥 Data Download | Download all model outputs |
+
+### Running the App
+
+```bash
+streamlit run app.py
+```
+
+The app will open in your browser at `http://localhost:8501`
+
+---
+
 ## Key Findings
 
 ### Model Performance
 
-- **Optimal Number of Clusters**: [To be filled after execution]
-- **Best Covariance Type**: [To be filled after execution]
-- **BIC Score**: [To be filled after execution]
-- **AIC Score**: [To be filled after execution]
+- **Optimal Number of Clusters:** [To be filled after execution]
+- **Best Covariance Type:** [To be filled after execution]
+- **BIC Score:** [To be filled after execution]
+- **AIC Score:** [To be filled after execution]
 
 ### Cluster Interpretations
 
@@ -311,18 +431,43 @@ After running the full notebook, the following files are generated:
 
 ### Implications for Public Health
 
-1. **Risk Stratification**: Identified clusters can inform targeted interventions
-2. **Resource Allocation**: Cluster sizes guide healthcare planning
-3. **Prevention Strategies**: Behavioral patterns inform prevention programs
+1. **Risk Stratification:** Identified clusters can inform targeted interventions
+2. **Resource Allocation:** Cluster sizes guide healthcare planning
+3. **Prevention Strategies:** Behavioral patterns inform prevention programs
 
 ---
 
 ## References
 
-1. McLachlan, G. J., & Peel, D. (2000). Finite Mixture Models. Wiley.
-2. CDC National Health and Nutrition Examination Survey. https://www.cdc.gov/nchs/nhanes/
-3. Scikit-learn: Machine Learning in Python, Pedregosa et al., JMLR 12, 2011.
-4. Bishop, C. M. (2006). Pattern Recognition and Machine Learning. Springer.
+### Academic References
+
+1. McLachlan, G. J., & Peel, D. (2000). *Finite Mixture Models*. Wiley.
+
+2. Bishop, C. M. (2006). *Pattern Recognition and Machine Learning*. Springer.
+
+3. Kroenke, K., Spitzer, R. L., & Williams, J. B. (2001). The PHQ-9: Validity of a brief depression severity measure. *Journal of General Internal Medicine*, 16(9), 606-613.
+
+4. Grundy, S. M., et al. (2005). Diagnosis and management of the metabolic syndrome. *Circulation*, 112(17), 2735-2752.
+
+5. Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., ... & Duchesnay, É. (2011). Scikit-learn: Machine learning in Python. *Journal of Machine Learning Research*, 12, 2825-2830.
+
+### NHANES Data References
+
+6. National Health and Nutrition Examination Survey. (2023). Centers for Disease Control and Prevention, National Center for Health Statistics. https://www.cdc.gov/nchs/nhanes/
+
+7. NHANES Analytic Guidelines. (2023). Centers for Disease Control and Prevention. https://www.cdc.gov/nchs/nhanes/analytic_guidelines.htm
+
+### Software and Tools
+
+8. Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020). Array programming with NumPy. *Nature*, 585(7825), 357-362.
+
+9. pandas development team. (2020). pandas: powerful Python data analysis toolkit. https://pandas.pydata.org/
+
+10. Hunter, J. D. (2007). Matplotlib: A 2D graphics environment. *Computing in Science & Engineering*, 9(3), 90-95.
+
+11. Waskom, M. L. (2021). seaborn: statistical data visualization. *Journal of Open Source Software*, 6(60), 3021.
+
+12. Streamlit Documentation. (2024). Streamlit Inc. https://docs.streamlit.io/
 
 ---
 
@@ -334,9 +479,20 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Author
 
-**Cavin Otieno**  
-MSc Public Health Data Science  
-Advanced Machine Learning (SDS6217)  
-University of Nairobi  
+**Group 6 - MSc Public Health Data Science**
 
-GitHub: [@OumaCavin](https://github.com/OumaCavin)
+| Student ID | Name | Role |
+|------------|------|------|
+| SDS6/46982/2024 | Cavin Otieno | Lead Developer |
+| SDS6/46284/2024 | Joseph Ongoro Marindi | Data Analyst |
+| SDS6/47543/2024 | Laura Nabalayo Kundu | Research Lead |
+| SDS6/47545/2024 | Nevin Khaemba | Visualization Lead |
+
+**Course:** Advanced Machine Learning (SDS6217)  
+**Institution:** University of Nairobi  
+**Date:** January 2025
+
+---
+
+*Last Updated: January 2025*
+*Version: 1.0*
