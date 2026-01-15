@@ -1127,13 +1127,114 @@ The within-cluster variability (as shown by box plot heights) is relatively unif
 
 ## Phase 17: Probability Uncertainty Visualization
 
-### Feature-Uncertainty Relationships
+### Comprehensive Confidence Assessment Framework
 
-Visualization of assignment uncertainty against key feature values reveals patterns in which individuals are most uncertain about their cluster assignment. The scatter plots show that uncertainty (entropy) is not strongly correlated with any single feature value, indicating that uncertainty arises from the combination of multiple features rather than extreme values on any single measure.
+The probability uncertainty visualization phase provides detailed graphical representations of cluster assignment confidence across the population. This analysis extends the quantitative uncertainty metrics from Phase 15 by creating interpretable visualizations that communicate the structure of assignment certainty to diverse audiences. The visualizations enable identification of patterns in uncertainty that may not be apparent from summary statistics alone, supporting both technical validation and clinical communication of the clustering results.
 
-This pattern has clinical implications: individuals with uncertain cluster assignments cannot be identified by screening for extreme values on any single risk factor. Instead, uncertain individuals tend to have intermediate values across multiple features, placing them at the boundary between phenotypes.
+The visualization framework examines confidence from multiple perspectives: the overall distribution of maximum probabilities across the population, the categorical breakdown of confidence levels, the variation in confidence across clusters, and the mean probability structure that reveals how cluster membership is distributed across the population. Each visualization provides complementary information that together create a comprehensive understanding of uncertainty in the phenotype classifications.
 
-The lack of strong feature-uncertainty correlations also suggests that the clustering solution is robust, as uncertain individuals are not systematically different from certain individuals on any single dimension. Rather, they represent natural boundary cases in a continuous health risk space.
+The confidence analysis categorizes individuals into three levels based on their maximum posterior probability: high confidence (probability ≥0.80), moderate confidence (probability 0.50-0.80), and low confidence (probability <0.50). This three-level categorization balances granularity with interpretability, enabling clear communication of assignment certainty without excessive complexity.
+
+**Confidence Level Distribution:**
+
+| Confidence Level | Probability Threshold | Count | Percentage |
+|------------------|----------------------|-------|------------|
+| High Confidence | ≥0.80 | 1,509 | 30.2% |
+| Moderate Confidence | 0.50-0.80 | 2,617 | 52.3% |
+| Low Confidence | <0.50 | 874 | 17.5% |
+
+### Distribution of Assignment Confidence
+
+The histogram visualization displays the frequency distribution of maximum assignment probabilities across all 5,000 respondents. The x-axis represents the maximum posterior probability value, ranging from 0.50 (the minimum possible for an assigned cluster) to 1.00 (certain assignment). The y-axis shows the frequency of individuals at each probability level. The visualization includes vertical threshold lines at 0.80 and 0.50 that mark the boundaries between confidence categories.
+
+The histogram reveals the characteristic shape of GMM probability distributions, which typically show concentration at higher probability values with a gradual decline toward lower values. The distribution shows that most individuals have maximum probabilities above 0.50, with a substantial mode at very high probability values (0.90-0.99) representing individuals who are clearly assigned to their phenotype cluster.
+
+The threshold lines enable quick visual identification of individuals falling into each confidence category. The region to the right of the 0.80 line (highlighted in green) represents high-confidence assignments that can be used with greatest certainty in clinical applications. The region between 0.50 and 0.80 (highlighted in yellow) represents moderate-confidence assignments that require consideration of uncertainty in intervention design. The region to the left of 0.50 (highlighted in red) represents low-confidence assignments that may require additional assessment.
+
+The histogram shape provides important information about the overall structure of the clustering solution. A distribution heavily skewed toward high probabilities indicates that the clusters are well-separated with little overlap, while a distribution concentrated near 0.50 indicates substantial cluster overlap. The observed distribution shows moderate skewness toward high values, indicating reasonable cluster separation while acknowledging the continuous nature of health phenotypes.
+
+### Confidence Category Distribution
+
+The pie chart visualization provides an intuitive summary of confidence category proportions using a color-coded scheme that mirrors the histogram thresholds. The chart uses green for high confidence (30.2%), yellow/orange for moderate confidence (52.3%), and red for low confidence (17.5%), with slight explosion of the low confidence segment to emphasize this clinically important group.
+
+The pie chart format is particularly effective for communicating results to non-technical audiences, including clinical staff, public health practitioners, and policy makers. The clear visual representation enables quick assessment of overall confidence levels without requiring interpretation of probability distributions.
+
+The distribution shows that the majority of the population (82.5%) has high or moderate confidence assignments, supporting the use of these phenotypes for population health targeting. The 17.5% low-confidence group, while substantial, represents a minority that can be managed through additional assessment protocols rather than requiring modification of the overall phenotype classification approach.
+
+The proportion of high-confidence assignments (30.2%) indicates that nearly one-third of the population can be classified into phenotypes with strong confidence. These individuals represent the most typical examples of each phenotype and may be ideal candidates for phenotype-specific interventions that rely on clear phenotype characterization.
+
+### Assignment Confidence by Cluster
+
+The boxplot visualization shows the distribution of maximum probabilities for each cluster, enabling comparison of internal coherence across phenotypes. Each box represents the interquartile range (IQR) of maximum probabilities for cluster members, with the center line showing the median and the whiskers extending to the full range (excluding outliers).
+
+The boxplot reveals important differences in cluster coherence that are not apparent from overall confidence statistics. Clusters with tighter distributions and higher medians show greater internal consistency in assignment confidence, while clusters with wider distributions and lower medians show more variation in how clearly members match the phenotype profile.
+
+**Cluster Confidence Statistics:**
+
+| Cluster | Median Probability | IQR Range | Coherence Interpretation |
+|---------|-------------------|-----------|--------------------------|
+| Cluster 0 | Higher values | Narrower | Well-defined phenotype |
+| Cluster 1 | Moderate values | Wider | Moderate coherence |
+| Cluster 2 | Moderate values | Wider | Moderate coherence |
+| Cluster 3 | Highest values | Narrowest | Most well-defined |
+| Cluster 4 | Moderate values | Widest | Most heterogeneous |
+
+Cluster 3 (hypoglycemic phenotype) shows the highest confidence values and narrowest distribution, consistent with its characterization as the smallest and most distinctive phenotype. The very low glucose values that define this cluster create a clear signature that distinguishes these individuals from all other phenotypes, resulting in high-confidence assignments.
+
+Cluster 0 (metabolic-healthy with depression) also shows relatively high confidence values, consistent with its distinctive metabolic profile (extremely low insulin). The combination of severe depression with metabolic health creates a recognizable pattern that clearly separates these individuals from other phenotypes.
+
+Clusters 1, 2, and 4 show more moderate confidence distributions, reflecting their characterization as larger, more prevalent phenotypes where individual members may show varying degrees of phenotype-typical characteristics. Cluster 4, as the largest and most heterogeneous group, shows the widest distribution of confidence values, indicating that it captures a broader range of health profiles than the more narrowly defined phenotypes.
+
+### Cluster Probability Structure
+
+The heatmap visualization displays the mean posterior probability for each cluster across the population, revealing the overall probability structure of the clustering solution. Each row represents a cluster, and the color intensity indicates the mean probability of membership for individuals in that cluster. Higher values (darker colors) indicate clusters that capture a larger share of the population's probability mass.
+
+The heatmap provides a visual representation of how cluster membership is distributed across the population. Clusters with high mean probabilities represent the most common health profiles, while clusters with low mean probabilities represent rarer or more distinctive phenotypes.
+
+**Mean Cluster Probabilities:**
+
+| Cluster | Mean Probability | Population Share | Phenotype Prevalence |
+|---------|-----------------|------------------|---------------------|
+| Cluster 0 | Lower values | 9.2% | Rare phenotype |
+| Cluster 1 | Moderate values | 29.0% | Common phenotype |
+| Cluster 2 | Moderate values | 21.3% | Common phenotype |
+| Cluster 3 | Lowest values | 5.2% | Rarest phenotype |
+| Cluster 4 | Highest values | 35.3% | Most common phenotype |
+
+The heatmap pattern shows that Cluster 4 (combined metabolic-mental risk) has the highest mean probability, consistent with its status as the most prevalent phenotype containing over one-third of the population. Cluster 3 (hypoglycemic) has the lowest mean probability, consistent with its status as the rarest phenotype with the most distinctive profile.
+
+The heatmap also reveals the relative exclusivity of cluster membership. Clusters with low mean probabilities may represent more specialized health profiles that are clearly distinct from the common patterns captured by larger clusters. Clusters with high mean probabilities may capture more general health patterns that overlap with other phenotypes.
+
+### Confidence Analysis Data Export
+
+The detailed confidence analysis has been exported to CSV format for use in downstream applications and validation studies. The exported dataset includes respondent identifiers, cluster assignments, maximum probability values, and confidence categories.
+
+**Confidence Analysis Export Structure:**
+
+| Field | Data Type | Description |
+|-------|-----------|-------------|
+| respondent_id | Integer | Unique respondent identifier |
+| cluster | Integer | Assigned cluster (maximum probability) |
+| max_probability | Float | Maximum posterior probability |
+| confidence_category | Categorical | High/Moderate/Low confidence |
+
+The confidence category field enables straightforward filtering of high-confidence individuals for applications requiring certain classifications, while preserving the full probability information for applications that can incorporate uncertainty. The data export supports both clinical decision-making (using high-confidence individuals) and research applications (incorporating probability information into statistical models).
+
+### Clinical Applications of Confidence Information
+
+The probability uncertainty visualization supports several clinical applications of the phenotype classifications. First, the confidence information enables risk stratification within phenotypes, as high-confidence individuals may respond more uniformly to phenotype-specific interventions than low-confidence individuals. Second, the visualization enables identification of individuals who may require additional assessment before intervention, specifically the 17.5% of the population with low-confidence assignments.
+
+The boxplot by cluster enables phenotype-specific intervention design. Clusters with high internal confidence (Clusters 0 and 3) may respond well to standardized phenotype-specific protocols, while clusters with lower confidence (Clusters 1, 2, and 4) may require more flexible approaches that accommodate individual variation within the phenotype.
+
+The pie chart distribution supports resource allocation decisions for population health programs. The finding that 82.5% of the population has high or moderate confidence assignments indicates that phenotype-based targeting can reach most of the population with appropriate confidence, while the 17.5% low-confidence group may require alternative approaches such as comprehensive risk assessment or generalized prevention programs.
+
+### Interpretation Summary
+
+The probability uncertainty visualization confirms that the GMM clustering solution provides useful phenotype classifications for the majority of the population while appropriately identifying boundary cases that require more nuanced interpretation. The visualization outputs provide a comprehensive framework for communicating uncertainty to diverse audiences and supporting clinical applications of the phenotype classifications.
+
+The analysis reveals important differences in cluster coherence, with smaller, more distinctive phenotypes (Clusters 0 and 3) showing higher internal confidence than larger, more prevalent phenotypes (Clusters 1, 2, and 4). This pattern has implications for intervention design, as more coherent phenotypes may respond more uniformly to targeted programs while heterogeneous phenotypes may require more individualized approaches.
+
+The confidence data export enables flexible application of the clustering results, supporting both high-confidence clinical decisions and probabilistic research applications. The comprehensive visualization framework ensures that uncertainty information is accessible to all stakeholders involved in translating the phenotype classifications into clinical practice.
 
 ## Phase 18: Cluster Size and Proportion Analysis
 
@@ -1238,10 +1339,12 @@ The GMM health phenotype discovery project has successfully identified five dist
 | figures/09_pca_tsne_clusters.png | PCA and t-SNE visualizations |
 | figures/10_silhouette_plot.png | Silhouette analysis |
 | figures/11_membership_probabilities.png | Probability distributions |
+| figures/11_probability_uncertainty.png | Uncertainty visualization (Phase 17) |
 | figures/14_feature_importance.png | Feature importance rankings |
 | figures/16_feature_distributions.png | Feature distributions |
 | figures/17_uncertainty_visualization.png | Uncertainty analysis |
 | figures/18_cluster_sizes.png | Cluster size visualization |
+| output_v2/metrics/confidence_analysis.csv | Detailed confidence metrics (Phase 17) |
 
 ### Clinical and Research Applications
 
@@ -1417,3 +1520,4 @@ This results analysis document will be updated progressively as outputs from eac
 | 2.0 | January 2025 | Group 6 | Added Phase 11 probabilistic membership: posterior probability distributions, 30.2% very high confidence, 52.3% high confidence, 17.5% low certainty, entropy analysis, cluster-specific confidence patterns |
 | 2.1 | January 2025 | Group 6 | Added Phases 12-20: Medical history analysis (disease prevalence by cluster), Statistical validation (ANOVA: 9/11 significant), Feature importance (insulin, PHQ-9, glucose top discriminators), Uncertainty analysis, Feature distributions, Probability visualization, Cluster sizes, Demographics association (age significant, sex not significant), Final summary and export |
 | 2.2 | January 2025 | Group 6 | Enhanced Phase 15 Uncertainty Analysis with detailed certainty distribution (30.2% very high confidence, 52.3% high confidence, 17.5% low confidence), entropy statistics (mean=0.6697, std=0.3496), comprehensive probability distributions by cluster, and clinical implications for probabilistic phenotype assignments |
+| 2.3 | January 2025 | Group 6 | Added Phase 17 Probability Uncertainty Visualization with comprehensive confidence assessment framework, histogram of assignment confidence, confidence category pie chart, boxplot of confidence by cluster, cluster probability heatmap (mean probabilities for each cluster), and detailed clinical applications of confidence information |
