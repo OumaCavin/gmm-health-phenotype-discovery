@@ -373,15 +373,52 @@ The completed preprocessing establishes the foundation for GMM clustering with p
 
 ---
 
-## Phase 5: Dimensionality Reduction (Pending Output)
+## Phase 5: Dimensionality Reduction for Visualization
 
-*[This section will be populated upon receiving Phase 5 output results]*
+### Principal Component Analysis Results
 
-Expected content includes:
-- PCA results (explained variance, component loadings)
-- t-SNE visualization
-- Reduced-dimensionality representation
-- Interpretation of principal components
+D two critical purposes in the GMM healthimensionality reduction serves phenotype discovery workflow: enabling visualization of high-dimensional data in interpretable 2D spaces, and potentially improving clustering performance by focusing on principal sources of variance. Principal Component Analysis (PCA) was applied as a linear dimensionality reduction technique, extracting the two orthogonal directions that capture the maximum variance in the scaled 11-feature dataset.
+
+The PCA analysis revealed that the first two principal components capture 19.4% of total variance in the data, with PC1 explaining 9.9% and PC2 explaining 9.6%. This relatively modest cumulative variance explanation indicates that the 11 health features span a genuinely high-dimensional space with no single dominant direction of variation. This finding is consistent with the correlation analysis, which revealed moderate correlations among variables rather than a few dominant factors. The health data exhibits complex, multidimensional structure that is not reducible to a small number of underlying factors.
+
+The near-parity of variance explained by PC1 and PC2 (9.9% vs 9.6%) suggests that the principal sources of variation are distributed across multiple health dimensions rather than dominated by a single factor like cardiometabolic risk or age. This distribution of variance has important implications for clustering, as it suggests that clusters may emerge from complex interactions among variables rather than separation along a single dominant dimension.
+
+**PCA Variance Summary:**
+
+| Component | Explained Variance | Cumulative Variance |
+|-----------|-------------------|---------------------|
+| PC1 | 9.9% | 9.9% |
+| PC2 | 9.6% | 19.4% |
+| Remaining 9 components | 80.6% | 100.0% |
+
+### t-SNE Visualization
+
+t-Distributed Stochastic Neighbor Embedding (t-SNE) was applied as a complementary nonlinear dimensionality reduction technique. Unlike PCA, which preserves global structure, t-SNE focuses on preserving local neighborhood relationships, making it particularly effective for visualizing cluster structure in high-dimensional data. The t-SNE analysis used standard parameters (perplexity=30, max_iter=1000) that provide a good balance between preserving local and global structure for datasets of this size.
+
+The t-SNE projection (03_dimensionality_reduction.png) reveals the underlying structure of the NHANES health data when mapped to a 2D visualization space. Points are colored by BMI value to show how this key health indicator is distributed across the reduced-dimensionality representation. The visualization enables preliminary assessment of cluster structure without actually performing clustering, as regions of point density may indicate potential clusters.
+
+The combination of PCA and t-SNE projections provides complementary views of the data. PCA preserves the overall geometry and relative positions of data points, while t-SNE emphasizes local neighborhood structure that may correspond to cluster membership. Agreement between the two visualizations regarding cluster presence would strengthen confidence in identified clusters, while disagreement would warrant further investigation.
+
+### Interpretation of Reduced-Dimensionality Representations
+
+The dimensionality reduction visualizations enable several preliminary observations about the health data structure. First, the data does not reveal obvious, well-separated clusters in the 2D projections, which may indicate that any clusters present are high-dimensional or that cluster separation requires the full feature space. Second, the continuous gradient of BMI values across the projections suggests that body composition is an important dimension of variation but does not alone determine cluster membership.
+
+The modest variance explained by the first two principal components (19.4% total) indicates that meaningful cluster structure may require considering the full 11-dimensional feature space. GMM clustering operates in the original feature space rather than reduced dimensions, so the dimensionality reduction primarily serves visualization purposes in this analysis. Future analyses might consider using PCA-transformed features for clustering if computational efficiency becomes a concern.
+
+**Implications for Clustering Analysis:**
+
+The dimensionality reduction results inform subsequent GMM clustering in several important ways. The distributed variance across principal components suggests that no single health dimension dominates population variation, supporting the use of multiple features in clustering. The lack of obvious cluster structure in 2D visualizations does not preclude the presence of clusters in higher dimensions, as complex cluster shapes may not project cleanly to 2D.
+
+The BMI-colored projections suggest that body composition is an important but not exclusive dimension of variation. Clusters identified in subsequent phases may show characteristic BMI patterns, but will likely also differ on cardiovascular, metabolic, and mental health dimensions. The complex structure revealed by these projections justifies the use of GMM with multiple components and flexible covariance structures.
+
+### Visual Comparison of Projections
+
+The side-by-side comparison of PCA and t-SNE projections (03_dimensionality_reduction.png) enables assessment of data structure from multiple perspectives. The PCA projection preserves global relationships and relative distances, showing how the overall population is distributed across the principal health dimensions. The t-SNE projection highlights local neighborhood structure, potentially revealing cluster boundaries that may not be apparent in PCA.
+
+The coloring of both projections by BMI enables tracking of this important health indicator through the dimensionality reduction process. Consistent BMI patterns across both projections would indicate that body composition is a robust dimension of variation, while divergent patterns would suggest that BMI's relationship with other features varies across the population.
+
+**Output Files Generated:**
+- Dimensionality reduction visualization: figures/plots/03_dimensionality_reduction.png
 
 ---
 
@@ -722,3 +759,4 @@ This results analysis document will be updated progressively as outputs from eac
 | 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, variable definitions and clinical context (42 variables across 7 categories), correlation analysis, missing value analysis |
 | 1.2 | January 2025 | Group 6 | Added Phase 3 correlation matrix with actual numerical values; enhanced interpretation of key correlations (BMI-BP, BMI-HDL, age-blood pressure, PHQ-9 independence); removed duplicate sections |
 | 1.3 | January 2025 | Group 6 | Added Phase 4 preprocessing: 11 features selected for GMM, StandardScaler applied, no missing values detected, scaler saved to models/gmm_clustering/standard_scaler.joblib |
+| 1.4 | January 2025 | Group 6 | Added Phase 5 dimensionality reduction: PCA (19.4% total variance explained), t-SNE visualization with perplexity=30, interpretation of reduced-dimensionality representations |
