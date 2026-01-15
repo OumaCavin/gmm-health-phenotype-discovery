@@ -1,0 +1,41 @@
+{
+  "dataset_info": {
+    "total_samples": 5000,
+    "n_features": 11,
+    "n_clusters": 5
+  },
+  "cluster_summary": {
+    "cluster_0": {
+      "size": 461,
+      "proportion": 9.22
+    },
+    "cluster_1": {
+      "size": 1448,
+      "proportion": 28.96
+    },
+    "cluster_2": {
+      "size": 1063,
+      "proportion": 21.26
+    },
+    "cluster_3": {
+      "size": 262,
+      "proportion": 5.24
+    },
+    "cluster_4": {
+      "size": 1766,
+      "proportion": 35.32
+    }
+  },
+  "model_metrics": {
+    "silhouette": 0.02743932988927849,
+    "calinski_harabasz": 160.8703017957128,
+    "davies_bouldin": 4.088377064050123,
+    "bic": 149836.89733161702,
+    "aic": 149093.93730779557
+  },
+  "certainty_summary": {
+    "very_high_confidence": 1509,
+    "high_confidence": 2617,
+    "low_confidence": 874
+  }
+}

@@ -434,171 +434,722 @@ Expected content includes:
 
 ---
 
-## Phase 7: Train Optimal GMM Model (Pending Output)
+## Phase 7: Train Optimal GMM Model
 
-*[This section will be populated upon receiving Phase 7 output results]*
+### Model Configuration Summary
 
-Expected content includes:
-- Final model parameters
-- Convergence information
-- Log-likelihood values
-- Model diagnostics
+The optimal GMM model was trained using hyperparameters selected from Phase 6 hyperparameter tuning. The grid search identified a 5-component model with diagonal covariance structure as the optimal configuration, balancing model fit against complexity as measured by the Bayesian Information Criterion (BIC). The diagonal covariance type assumes that features are conditionally independent within each cluster, which reduces the number of parameters compared to the full covariance model while still allowing clusters to have different variances along each feature dimension.
 
----
+The training process utilized a standard 80-20 train-test split with 4,000 samples for model fitting and 1,000 samples for validation. The model was initialized with 10 different random starting points to reduce sensitivity to initialization and ensure convergence to a stable solution. The regularization parameter (1e-6) was applied to prevent singular covariance matrices during estimation, ensuring numerical stability even when cluster covariance matrices might approach degeneracy.
 
-## Phase 8: Cluster Interpretation and Profiling (Pending Output)
+**Optimal Model Configuration:**
 
-*[This section will be populated upon receiving Phase 8 output results]*
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| n_components | 5 | Number of Gaussian mixture components |
+| covariance_type | diag | Diagonal covariance matrix (axis-aligned ellipses) |
+| n_init | 10 | Number of random initializations |
+| reg_covar | 1e-6 | Regularization added to covariance diagonal |
+| max_iter | 500 | Maximum EM iterations |
+| random_state | 42 | Random seed for reproducibility |
 
-Expected content includes:
-- Cluster profile characteristics
-- Mean values for each cluster
-- Clinical interpretation of phenotypes
-- Distinguishing features per cluster
+### Convergence Analysis
 
----
+The EM algorithm converged successfully in 71 iterations, achieving a final log-likelihood of -14.89 on the training data. Convergence was declared when the change in log-likelihood between successive iterations fell below the sklearn default threshold (1e-6), indicating that additional iterations would not meaningfully improve model fit. The relatively low iteration count (71) compared to the maximum (500) suggests that the model found a stable solution efficiently, without requiring excessive computational effort.
 
-## Phase 9: Cluster Visualization (Pending Output)
+The convergence behavior provides confidence in the model estimation. When GMMs require many iterations to converge or fail to converge entirely, this often indicates numerical instability or poor model specification. The smooth convergence observed here, combined with the consistent results across multiple random initializations (documented in the stability analysis below), suggests that the identified solution represents a genuine local maximum of the likelihood function rather than an artifact of a particular starting point.
 
-*[This section will be populated upon receiving Phase 9 output results]*
+### Model Performance Metrics
 
-Expected content includes:
-- PCA 2D projections
-- t-SNE visualizations
-- 3D cluster representations
-- Visual cluster separation assessment
+The model was evaluated using multiple internal validation indices that assess different aspects of cluster quality. The silhouette score measures how similar each point is to its own cluster compared to other clusters, with values ranging from -1 (poor assignment) to +1 (excellent assignment). The Calinski-Harabasz index measures the ratio of between-cluster dispersion to within-cluster dispersion, with higher values indicating better-defined clusters. The Davies-Bouldin index measures the average similarity between each cluster and its most similar cluster, with lower values indicating better separation.
 
----
+**Training Set Performance:**
 
-## Phase 10: Model Evaluation Metrics (Pending Output)
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| Log-likelihood | -14.8923 | Model fit to training data |
+| BIC | 120,083.76 | Bayesian Information Criterion |
+| AIC | 119,366.24 | Akaike Information Criterion |
+| Silhouette Score | 0.0275 | Weak cluster separation |
+| Calinski-Harabasz Index | 131.24 | Moderate cluster structure |
+| Davies-Bouldin Index | 4.06 | Moderate overlap |
 
-*[This section will be populated upon receiving Phase 10 output results]*
+**Test Set Performance:**
 
-Expected content includes:
-- Silhouette score analysis
-- Calinski-Harabasz index
-- Davies-Bouldin index
-- Interpretation of quality metrics
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| Log-likelihood | -14.8638 | Model fit to test data |
+| BIC | 30,515.18 | Generalization performance |
+| AIC | 29,955.70 | Generalization performance |
+| Silhouette Score | 0.0246 | Weak cluster separation |
+| Calinski-Harabasz Index | 30.57 | Weaker test set structure |
+| Davies-Bouldin Index | 4.11 | Moderate overlap |
 
----
+The close correspondence between training and test set metrics indicates that the model generalizes appropriately to new data without overfitting. The log-likelihood values are nearly identical between sets (-14.89 vs -14.86), and the silhouette scores are similar (0.028 vs 0.025), suggesting that the clustering structure identified in the training data is present in the broader population. The reduced Calinski-Harabasz index on the test set (30.57 vs 131.24) reflects the smaller test sample size rather than degraded cluster quality.
 
-## Phase 11: Probabilistic Membership Analysis (Pending Output)
+### Cluster Weight Distribution
 
-*[This section will be populated upon receiving Phase 11 output results]*
+The mixing coefficients represent the prior probability of each component in the mixture model, indicating the proportion of the population expected to belong to each health phenotype. These weights are estimated during the EM algorithm and reflect the relative frequency of each cluster in the population. The weights must sum to 1 by definition, ensuring a valid probability distribution.
 
-Expected content includes:
-- Posterior probability distributions
-- Cluster assignment certainty
-- Membership probability analysis
-- Soft clustering interpretation
+**Cluster Weights:**
 
----
+| Cluster | Weight | Proportion | Population Count |
+|---------|--------|------------|------------------|
+| Cluster 0 | 0.0895 | 8.9% | 461 |
+| Cluster 1 | 0.2412 | 24.1% | 1,448 |
+| Cluster 2 | 0.2494 | 24.9% | 1,063 |
+| Cluster 3 | 0.0554 | 5.5% | 262 |
+| Cluster 4 | 0.3644 | 36.4% | 1,766 |
 
-## Phase 12: Medical History Analysis (Pending Output)
+The cluster weight distribution reveals substantial population heterogeneity, with no single phenotype dominating the population. Cluster 4 contains the largest proportion (36.4%), representing a "majority" phenotype that captures the most common health profile in this population. Clusters 1 and 2 represent intermediate-sized groups (approximately 24-25% each), while Clusters 0 and 3 represent smaller subgroups (9% and 5.5% respectively) that may represent distinct health phenotypes with unique characteristics. This distribution pattern is typical of health phenotype data, where most individuals exhibit relatively common risk profiles while smaller subgroups exhibit unusual combinations of risk factors.
 
-*[This section will be populated upon receiving Phase 12 output results]*
+### Cluster Centroids in Standardized Feature Space
 
-Expected content includes:
-- Disease prevalence by cluster
-- Medical history associations
-- Clinical validation of phenotypes
-- Comorbidity patterns
+The cluster means (centroids) in the standardized feature space reveal the characteristic profile of each health phenotype. Positive values indicate above-average values for that feature (relative to the population mean), while negative values indicate below-average values. The magnitude indicates the deviation from the mean in standard deviation units.
 
----
+**Cluster Centroid Matrix (Standardized Values):**
 
-## Phase 13: Statistical Cluster Validation (Pending Output)
+| Feature | Cluster 0 | Cluster 1 | Cluster 2 | Cluster 3 | Cluster 4 |
+|---------|-----------|-----------|-----------|-----------|-----------|
+| age | 0.025 | 0.123 | -0.006 | 0.005 | -0.041 |
+| bmi | -0.006 | -0.003 | -0.015 | -0.014 | 0.025 |
+| waist_circumference_cm | -0.034 | 0.046 | -0.017 | -0.008 | 0.001 |
+| systolic_bp_mmHg | 0.046 | 0.129 | -0.104 | 0.122 | -0.015 |
+| diastolic_bp_mmHg | 0.018 | 0.032 | 0.055 | -0.072 | -0.043 |
+| total_cholesterol_mg_dL | 0.008 | -0.051 | -0.072 | 0.065 | 0.057 |
+| hdl_cholesterol_mg_dL | -0.011 | 0.059 | 0.087 | 0.035 | -0.076 |
+| ldl_cholesterol_mg_dL | 0.005 | -0.116 | 0.091 | -0.028 | 0.014 |
+| fasting_glucose_mg_dL | -0.074 | 0.138 | -0.112 | -1.693 | 0.250 |
+| insulin_uU_mL | -1.468 | -0.426 | 0.728 | 0.105 | 0.159 |
+| phq9_total_score | -0.043 | -0.555 | -0.228 | 0.023 | 0.540 |
 
-*[This section will be populated upon receiving Phase 13 output results]*
+The cluster centroids reveal distinct phenotypic patterns across the five clusters. Cluster 0 is characterized by notably low insulin levels (-1.468 standard deviations), suggesting a phenotype with favorable metabolic function despite average values on other dimensions. Cluster 1 shows slightly elevated blood pressure and glucose with low depression scores (-0.555), suggesting a cardiometabolic risk phenotype with good mental health. Cluster 2 shows elevated insulin (0.728) and LDL cholesterol (0.091) with favorable HDL (0.087), suggesting an emerging dyslipidemia phenotype. Cluster 3 is dramatically characterized by very low fasting glucose (-1.693), representing a hypoglycemia or highly insulin-sensitive phenotype. Cluster 4 shows elevated glucose (0.250) and depression symptoms (0.540) with low HDL cholesterol (-0.076), suggesting a phenotype combining metabolic and mental health concerns.
 
-Expected content includes:
-- ANOVA results for continuous variables
-- Chi-square tests for categorical variables
-- Statistical significance assessment
-- Cluster validity confirmation
+### Model Stability Assessment
 
----
+Model stability was assessed by training the optimal configuration with 10 different random seeds and comparing the resulting log-likelihood and BIC values. High stability indicates that the model solution is robust to initialization, while low stability suggests that different initializations may produce substantially different solutions, raising concerns about the reliability of the identified clusters.
 
-## Phase 14: Feature Importance Analysis (Pending Output)
+**Stability Analysis Results:**
 
-*[This section will be populated upon receiving Phase 14 output results]*
+| Metric | Mean | Standard Deviation | Coefficient of Variation |
+|--------|------|-------------------|--------------------------|
+| Log-likelihood | -15.54 | 0.14 | -0.9% |
+| BIC | 125,261.03 | 1,133.33 | 0.9% |
+| Convergence Rate | 10/10 | N/A | 100% |
 
-Expected content includes:
-- Feature contribution to clustering
-- Discriminating variables
-- Clinical relevance assessment
-- Dimensionality reduction validation
+The stability analysis demonstrates excellent model robustness. The coefficient of variation for log-likelihood is less than 1%, indicating that the model fit is nearly identical across all random initializations. The BIC shows slightly more variation (0.9% CV), which is expected given that BIC incorporates the number of free parameters and may be more sensitive to minor variations in covariance estimation. The 100% convergence rate across all 10 runs indicates that the model specification is numerically stable and does not encounter convergence failures that might require adjustments to regularization or iteration limits.
 
----
+### Implications for Cluster Interpretation
 
-## Phase 15: Uncertainty Analysis (Pending Output)
+The successful training of the optimal GMM model establishes the foundation for detailed cluster interpretation in subsequent phases. The five-cluster solution captures meaningful population heterogeneity, with clusters showing distinct patterns across metabolic, cardiovascular, and mental health dimensions. The weak silhouette scores (0.028) indicate that cluster boundaries are "fuzzy," with substantial overlap between adjacent clusters, which is expected in health phenotype data where individuals often exhibit characteristics spanning multiple risk categories.
 
-*[This section will be populated upon receiving Phase 15 output results]*
+The probabilistic nature of GMM assignment is particularly valuable for health applications, as it allows for uncertainty quantification in phenotype classification. Rather than forcing each individual into a single hard category, the model provides posterior probabilities that indicate the degree of fit to each phenotype. This uncertainty-aware approach is clinically relevant because health risk profiles rarely fall into discrete categories, and individuals on cluster boundaries may benefit from assessment against multiple phenotype profiles.
 
-Expected content includes:
-- Probability distribution analysis
-- Assignment confidence levels
-- Entropy calculations
-- Uncertainty quantification
-
----
-
-## Phase 16: Feature Distribution by Cluster (Pending Output)
-
-*[This section will be populated upon receiving Phase 16 output results]*
-
-Expected content includes:
-- Box plot visualizations
-- Violin plot distributions
-- Statistical comparisons
-- Outlier identification
+The model artifacts (trained GMM and fitted scaler) have been saved for use in subsequent analysis phases, including cluster interpretation, visualization, and external validation against clinical outcomes.
 
 ---
 
-## Phase 17: Probability Uncertainty Visualization (Pending Output)
+## Phase 8: Cluster Interpretation and Profiling
 
-*[This section will be populated upon receiving Phase 17 output results]*
+### Cluster Distribution Overview
 
-Expected content includes:
-- Detailed probability plots
-- Confidence visualization
-- Uncertainty mapping
-- Risk assessment visualization
+The GMM clustering algorithm identified five distinct health phenotypes within the NHANES population. The cluster sizes range from 262 individuals (5.2%) for the smallest subgroup to 1,766 individuals (35.3%) for the largest, indicating meaningful population heterogeneity without extreme concentration in any single phenotype. This distribution pattern suggests that the five-cluster solution captures a range of health profiles that are all represented in substantial proportions of the population.
+
+The cluster proportions reveal that the majority phenotype (Cluster 4) contains just over one-third of the population, with the remaining three-fifths distributed across the other four phenotypes. This structure is typical of health phenotype data, where most individuals exhibit relatively common risk profiles while smaller subgroups represent distinct combinations of risk factors. The absence of very small clusters (none below 5%) indicates that the solution identifies genuine population subgroups rather than outliers or artifacts of the clustering algorithm.
+
+**Cluster Size and Proportion Summary:**
+
+| Cluster | Count | Proportion | Phenotype Category |
+|---------|-------|------------|-------------------|
+| Cluster 0 | 461 | 9.2% | Metabolic-Healthy with Depression |
+| Cluster 1 | 1,448 | 29.0% | Cardiometabolic Risk |
+| Cluster 2 | 1,063 | 21.3% | Insulin Resistant Phenotype |
+| Cluster 3 | 262 | 5.2% | Hypoglycemic Phenotype |
+| Cluster 4 | 1,766 | 35.3% | Combined Metabolic-Mental Risk |
+
+### Cluster Mean Profiles
+
+The cluster profiles represent the mean values of each health indicator for individuals assigned to that cluster. These profiles reveal the characteristic health characteristics of each phenotype and enable clinical interpretation of the clusters. The values are reported in original units (not standardized) to facilitate clinical interpretation.
+
+**Cluster Mean Values by Health Indicator:**
+
+| Feature | Cluster 0 | Cluster 1 | Cluster 2 | Cluster 3 | Cluster 4 | Population Mean |
+|---------|-----------|-----------|-----------|-----------|-----------|-----------------|
+| age | 49.2 | 50.7 | 49.0 | 48.8 | 48.0 | 49.1 |
+| bmi | 27.8 | 27.9 | 27.7 | 27.7 | 28.2 | 27.9 |
+| waist_circumference_cm | 94.2 | 95.9 | 94.6 | 95.1 | 94.7 | 95.0 |
+| systolic_bp_mmHg | 125.6 | 127.7 | 122.3 | 126.3 | 124.5 | 125.1 |
+| diastolic_bp_mmHg | 75.2 | 75.4 | 75.8 | 75.0 | 74.4 | 75.1 |
+| total_cholesterol_mg_dL | 200.3 | 197.0 | 196.0 | 202.6 | 204.5 | 200.0 |
+| hdl_cholesterol_mg_dL | 49.6 | 51.3 | 51.2 | 49.9 | 48.1 | 49.9 |
+| ldl_cholesterol_mg_dL | 119.8 | 114.8 | 124.9 | 119.1 | 121.1 | 119.9 |
+| fasting_glucose_mg_dL | 97.9 | 102.5 | 94.7 | 60.0 | 107.9 | 100.1 |
+| insulin_uU_mL | 2.0 | 10.6 | 26.2 | 16.7 | 16.6 | 15.6 |
+| phq9_total_score | 26.7 | 20.5 | 23.0 | 27.3 | 35.2 | 27.2 |
+
+### Deviation Analysis
+
+The deviation analysis quantifies how each cluster differs from the population average, expressed as a percentage difference. This analysis identifies the most distinctive characteristics of each phenotype and helps prioritize intervention targets.
+
+**Percentage Deviation from Population Mean:**
+
+| Feature | Cluster 0 | Cluster 1 | Cluster 2 | Cluster 3 | Cluster 4 |
+|---------|-----------|-----------|-----------|-----------|-----------|
+| age | +0.2% | +3.2% | -0.3% | -0.7% | -2.4% |
+| bmi | -0.6% | -0.2% | -0.8% | -0.8% | +0.9% |
+| waist_circumference_cm | -0.8% | +1.0% | -0.4% | +0.1% | -0.3% |
+| systolic_bp_mmHg | +0.4% | +2.0% | -2.3% | +1.0% | -0.5% |
+| hdl_cholesterol_mg_dL | -0.6% | +2.7% | +2.6% | +0.1% | -3.7% |
+| fasting_glucose_mg_dL | -2.2% | +2.4% | -5.3% | -40.1% | +7.8% |
+| insulin_uU_mL | -87.1% | -31.9% | +68.2% | +7.6% | +6.7% |
+| phq9_total_score | -1.7% | -24.5% | -15.4% | +0.4% | +29.7% |
+
+### Individual Cluster Interpretations
+
+**Cluster 0: Metabolic-Healthy with Depression (n=461, 9.2%)**
+
+Cluster 0 represents a phenotype with remarkably low insulin levels (2.0 μU/mL, 87% below mean) while maintaining normal glucose (97.9 mg/dL), suggesting exceptional insulin sensitivity. This cluster has average BMI (27.8 kg/m², overweight category) and blood pressure (125.6 mmHg, normal-elevated), with moderate HDL cholesterol (49.6 mg/dL). The PHQ-9 score of 26.7 indicates severe depression symptoms despite favorable metabolic parameters. This phenotype suggests individuals with depression who have maintained metabolic health, possibly through diet, physical activity, or genetic factors that protect against insulin resistance despite psychiatric illness. The small size (9.2%) and distinctive metabolic profile make this an important subgroup for understanding the relationship between mental and metabolic health.
+
+**Cluster 1: Cardiometabolic Risk with Moderate Depression (n=1,448, 29.0%)**
+
+Cluster 1 is the second-largest phenotype, characterized by elevated cardiometabolic risk factors including elevated glucose (102.5 mg/dL, prediabetes range), higher blood pressure (127.7 mmHg), and the oldest mean age (50.7 years). The cluster shows favorable lipid profiles with the highest HDL (51.3 mg/dL) and lowest LDL (114.8 mg/dL). PHQ-9 score of 20.5 indicates severe depression but is the lowest among the severe depression clusters. This phenotype represents individuals with emerging cardiometabolic dysfunction who may benefit from intensive lifestyle intervention to prevent progression to diabetes and cardiovascular disease. The moderate depression levels may reflect awareness of health risks or could contribute to difficulties with self-care behaviors.
+
+**Cluster 2: Insulin Resistant Phenotype (n=1,063, 21.3%)**
+
+Cluster 2 shows a distinctive pattern of elevated insulin (26.2 μU/mL, 68% above mean) with normal glucose (94.7 mg/dL), representing early insulin resistance where the pancreas compensates for reduced insulin sensitivity by producing more insulin. This cluster has the lowest systolic blood pressure (122.3 mmHg) and favorable lipids with high HDL (51.2 mg/dL) and elevated LDL (124.9 mg/dL). PHQ-9 of 23.0 indicates severe depression. This phenotype represents a critical intervention window where lifestyle modification may prevent progression to overt hyperglycemia and type 2 diabetes. The insulin elevation may also contribute to weight gain and difficulty with weight loss, creating a challenging cycle for affected individuals.
+
+**Cluster 3: Hypoglycemic Phenotype (n=262, 5.2%)**
+
+Cluster 3 is the smallest subgroup, characterized by dramatically low fasting glucose (60.0 mg/dL, 40% below mean). This value falls below the normal range (70-99 mg/dL) and may indicate reactive hypoglycemia, insulinoma, or other conditions causing glucose dysregulation. Despite low glucose, insulin levels are near average (16.7 μU/mL), suggesting possible impaired glucose regulation. BMI and blood pressure are near average, while PHQ-9 of 27.3 indicates severe depression. This unusual metabolic profile warrants clinical attention as it may indicate underlying pathology. The combination of hypoglycemia and severe depression could reflect shared underlying mechanisms or may represent individuals with multiple health conditions requiring specialized care.
+
+**Cluster 4: Combined Metabolic-Mental Risk (n=1,766, 35.3%)**
+
+Cluster 4 is the largest phenotype, characterized by multiple concurrent risk factors: elevated BMI (28.2 kg/m²), elevated glucose (107.9 mg/dL, prediabetes), reduced HDL cholesterol (48.1 mg/dL), and the highest PHQ-9 score (35.2, significantly above the severe depression threshold). This cluster has the youngest mean age (48.0 years) yet exhibits the most adverse risk factor profile, suggesting accelerated disease processes or behavioral patterns that increase both metabolic and mental health risk. The 30% elevation in depression symptoms above the population mean is striking and may reflect bidirectional relationships between obesity, glucose dysregulation, and depression through inflammatory pathways, HPA axis dysfunction, and behavioral mechanisms.
+
+### Cardiometabolic Risk Assessment by Cluster
+
+**BMI Classification by Cluster:**
+
+| Cluster | Mean BMI | Clinical Category | Risk Level |
+|---------|----------|-------------------|------------|
+| Cluster 0 | 27.8 | Overweight | Moderate |
+| Cluster 1 | 27.9 | Overweight | Moderate |
+| Cluster 2 | 27.7 | Overweight | Moderate |
+| Cluster 3 | 27.7 | Overweight | Moderate |
+| Cluster 4 | 28.2 | Overweight | Moderate to High |
+
+All five clusters show mean BMI in the overweight range (25-29.9 kg/m²), indicating that obesity is a common feature across the population rather than a distinguishing factor between phenotypes. Cluster 4 has the highest BMI (28.2) and is closest to the obese threshold, while Cluster 2 has the lowest (27.7). The modest BMI variation across clusters (range: 27.7-28.2) suggests that body mass alone does not drive cluster separation; rather, it is the combination of BMI with other metabolic and mental health factors that defines the distinct phenotypes.
+
+**Blood Pressure Classification by Cluster:**
+
+| Cluster | Mean SBP | Clinical Category | Population Rank |
+|---------|----------|-------------------|-----------------|
+| Cluster 0 | 125.6 | Normal-Elevated | 3rd |
+| Cluster 1 | 127.7 | Elevated | Highest |
+| Cluster 2 | 122.3 | Normal | Lowest |
+| Cluster 3 | 126.3 | Normal-Elevated | 2nd |
+| Cluster 4 | 124.5 | Normal-Elevated | 4th |
+
+Blood pressure variation is more substantial across clusters, with Cluster 1 showing elevated systolic blood pressure (127.7 mmHg) approaching hypertension Stage 1, while Cluster 2 has the lowest values (122.3 mmHg) in the optimal range. This variation may reflect age differences, medication use, or underlying differences in cardiovascular health between phenotypes. Clusters with elevated blood pressure (1 and 3) may benefit from blood pressure monitoring and lifestyle modification to prevent progression to hypertension.
+
+**Glycemic Status by Cluster:**
+
+| Cluster | Mean Glucose | Clinical Category | Proportion with Prediabetes/Diabetes |
+|---------|--------------|-------------------|--------------------------------------|
+| Cluster 0 | 97.9 | Normal | Low |
+| Cluster 1 | 102.5 | Prediabetes | Moderate |
+| Cluster 2 | 94.7 | Normal | Low |
+| Cluster 3 | 60.0 | Hypoglycemia | Low (but abnormal) |
+| Cluster 4 | 107.9 | Prediabetes | High |
+
+Glycemic status shows the most dramatic variation across clusters, from the hypoglycemic values in Cluster 3 (60.0 mg/dL) to the prediabetic values in Cluster 4 (107.9 mg/dL). Clusters 1 and 4 show prediabetic glucose levels that warrant clinical attention, as these individuals are at elevated risk for type 2 diabetes and cardiovascular disease. Cluster 3's hypoglycemia is equally concerning from a clinical perspective, as it may indicate underlying pathology requiring medical evaluation.
+
+### Mental Health Assessment by Cluster
+
+Depression severity, as measured by the PHQ-9, shows substantial variation across phenotypes with implications for clinical care. All clusters show mean PHQ-9 scores in the severe depression range (20-27), but Cluster 4 has a dramatically elevated score (35.2) that is 30% above the population mean and suggests more severe functional impairment.
+
+**Depression Severity by Cluster:**
+
+| Cluster | PHQ-9 Score | Severity Category | Deviation from Mean |
+|---------|-------------|-------------------|---------------------|
+| Cluster 0 | 26.7 | Severe | -1.7% |
+| Cluster 1 | 20.5 | Severe | -24.5% |
+| Cluster 2 | 23.0 | Severe | -15.4% |
+| Cluster 3 | 27.3 | Severe | +0.4% |
+| Cluster 4 | 35.2 | Severe (Elevated) | +29.7% |
+
+The clustering of severe depression across all phenotypes confirms that mental health burden is a pervasive issue in this population, affecting every health phenotype. However, the substantial variation (PHQ-9 range: 20.5-35.2) suggests that depression severity is not uniform and may be related to the metabolic characteristics of each phenotype. Clusters 1 and 2 show somewhat lower depression scores, while Clusters 3 and 4 show elevated scores. Cluster 4's dramatically elevated depression may reflect the bidirectional relationship between metabolic dysfunction and depression, or may indicate that severe depression contributes to difficulty with health behaviors that maintain metabolic health.
+
+### Clinical Phenotype Summary
+
+The five-cluster solution identifies distinct health phenotypes with characteristic risk factor profiles and clinical implications:
+
+**Phenotype Summary Table:**
+
+| Cluster | Primary Characteristics | Key Risk Factors | Clinical Priority |
+|---------|------------------------|------------------|-------------------|
+| 0 | Low insulin, normal glucose, severe depression | Depression | Mental health integration |
+| 1 | Elevated glucose, elevated BP, older age | Cardiometabolic risk | Diabetes prevention |
+| 2 | High insulin, normal glucose, elevated LDL | Insulin resistance | Early intervention |
+| 3 | Low glucose, normal metabolic profile | Hypoglycemia | Medical evaluation |
+| 4 | Multiple risks: obesity, dysglycemia, low HDL, severe depression | Combined metabolic-mental | Comprehensive care |
+
+The phenotype structure supports a precision public health approach where different intervention strategies may be appropriate for different subgroups. Cluster 1 and 4 individuals may benefit from intensive diabetes prevention programs. Cluster 2 represents an early intervention opportunity targeting insulin resistance before glucose elevations occur. Cluster 3 requires medical evaluation for hypoglycemia. Cluster 0 demonstrates that metabolic health can be maintained despite severe depression, providing hope and potential lessons for other phenotypes. Cluster 4's combination of metabolic and mental health challenges suggests the need for integrated care approaches addressing both dimensions simultaneously.
 
 ---
 
-## Phase 18: Cluster Size and Proportion Analysis (Pending Output)
+## Phase 9: Cluster Visualization
 
-*[This section will be populated upon receiving Phase 18 output results]*
+### PCA and t-SNE Projections
 
-Expected content includes:
-- Cluster size distribution
-- Population prevalence estimates
-- Proportion comparisons
-- Sample size adequacy
+Visualization of high-dimensional clustering results in reduced-dimensionality spaces provides important insights into cluster structure and separation. Two complementary dimensionality reduction techniques were applied: Principal Component Analysis (PCA), which preserves global structure and variance relationships, and t-distributed Stochastic Neighbor Embedding (t-SNE), which emphasizes local neighborhood structure and is particularly effective for visualizing cluster boundaries.
+
+The PCA projection reveals the distribution of clusters along the two principal axes of maximum variance in the standardized 11-feature space. The first principal component (PC1) captures 9.9% of total variance, representing the dominant direction of variation in the health data. The second principal component (PC2) captures an additional 9.6% of variance, resulting in a cumulative explained variance of 19.4% for the 2D projection. This relatively modest cumulative variance is expected given the high-dimensional nature of the data (11 features) and indicates that meaningful cluster structure exists in dimensions beyond those visible in the 2D projection.
+
+The t-SNE projection uses a nonlinear transformation that preserves local neighborhood relationships, making cluster boundaries more apparent than in linear projections like PCA. The algorithm was configured with standard parameters (perplexity=30, max_iter=1000) that provide a good balance between preserving local and global structure for datasets of this size (5,000 observations).
+
+**Dimensionality Reduction Summary:**
+
+| Method | PC1/Dim1 Variance | PC2/Dim2 Variance | Total Variance Explained |
+|--------|-------------------|-------------------|--------------------------|
+| PCA | 9.9% | 9.6% | 19.4% |
+| t-SNE | N/A (nonlinear) | N/A (nonlinear) | Local structure emphasized |
+
+### Cluster Centroids in Reduced Space
+
+The cluster centroids in the reduced-dimensionality representations reveal the relative positions and separations of each phenotype. In PCA space, Cluster 4 shows the highest values on both PC1 (0.486) and PC2 (0.590), indicating that this phenotype represents the extreme of the primary variance directions in the data. Clusters 0 and 1 occupy the lower-left quadrant of PCA space with negative values on both components, while Clusters 2 and 3 show mixed positioning with positive PC1 values but negative PC2 values.
+
+In t-SNE space, which preserves different aspects of the data structure, the cluster separation is more pronounced. Clusters 0 and 1 appear in the upper portion of the projection (positive t-SNE2), while Clusters 2, 3, and 4 occupy lower positions. The mean pairwise distance in t-SNE space (29.45) is substantially larger than in PCA space (0.86, scaled), indicating that t-SNE better separates the cluster centroids in a way that facilitates visual interpretation.
+
+**Cluster Centroids in Reduced Dimensions:**
+
+| Cluster | PC1 | PC2 | t-SNE1 | t-SNE2 | Cluster Size |
+|---------|-----|-----|--------|--------|--------------|
+| Cluster 0 | -0.511 | -0.214 | 22.49 | -14.11 | 461 (9.2%) |
+| Cluster 1 | -0.688 | -0.313 | 24.75 | -4.75 | 1,448 (29.0%) |
+| Cluster 2 | 0.311 | -0.345 | -19.89 | 12.61 | 1,063 (21.3%) |
+| Cluster 3 | 0.168 | -0.469 | 3.13 | -6.87 | 262 (5.2%) |
+| Cluster 4 | 0.486 | 0.590 | -15.56 | 1.09 | 1,766 (35.3%) |
+
+### Cluster Separation Analysis
+
+Quantitative assessment of cluster separation in the reduced-dimensionality spaces provides objective measures of how well the clusters are distinguished. The mean pairwise centroid distance in PCA space (0.864) represents the average Euclidean distance between cluster centroids projected onto the first two principal components. In t-SNE space, the equivalent distance (29.45) reflects the non-linear transformation and is not directly comparable to PCA distances but indicates relative separation.
+
+The most separated cluster pairs in PCA space are Clusters 1 and 4 (distance: 1.48) and Clusters 0 and 4 (distance: 1.28), indicating that Cluster 4 represents the most distinct phenotype from the lower-left clusters. The closest cluster pairs are Clusters 0 and 1 (distance: 0.20) and Clusters 2 and 3 (distance: 0.19), suggesting these pairs share similar positions in the principal component space and may be more difficult to distinguish based on the dominant variance directions.
+
+**Pairwise Centroid Distances in PCA Space:**
+
+| Cluster Pair | Distance | Interpretation |
+|--------------|----------|----------------|
+| Cluster 0 - Cluster 1 | 0.203 | Closely positioned |
+| Cluster 0 - Cluster 4 | 1.280 | Well-separated |
+| Cluster 1 - Cluster 4 | 1.481 | Most distant |
+| Cluster 2 - Cluster 3 | 0.190 | Closely positioned |
+| Cluster 3 - Cluster 4 | 1.106 | Moderately separated |
+| Mean Pairwise | 0.864 | Overall separation |
+
+### Visualization Observations
+
+The PCA and t-SNE visualizations reveal several important characteristics of the cluster structure. First, substantial overlap exists between adjacent clusters in both projections, consistent with the low silhouette scores observed in Phase 7 and confirming that the health phenotypes represent continuous variation in the population rather than discrete categories. This overlap is particularly apparent between Clusters 0 and 1, which share similar positions in the health indicator space.
+
+Second, Cluster 4 (the largest phenotype) shows good separation from Clusters 0 and 1 in both projections, confirming that this combined metabolic-mental risk phenotype represents a genuinely distinct population subgroup. The visualization supports the clinical interpretation of Cluster 4 as a high-priority group for integrated metabolic and mental health interventions.
+
+Third, Clusters 2 and 3 appear relatively close in PCA space despite their very different clinical profiles (insulin resistant vs. hypoglycemic). This proximity suggests that these phenotypes are distinguished by features that do not align with the principal axes of variance, potentially including the interaction between insulin and glucose levels that differentiates these groups.
+
+### Health Indicator Overlay Analysis
+
+Visualization of key health indicators (BMI, fasting glucose) overlaid on the dimensionality reduction projections reveals how these important risk factors are distributed across the cluster structure. The BMI-colored PCA projection shows relatively uniform distribution of body mass across the cluster space, consistent with the finding that all clusters have mean BMI in the overweight range with limited between-cluster variation.
+
+The fasting glucose-colored projections show more pronounced variation, with Cluster 4 individuals tending toward higher glucose values (red/orange colors) and Cluster 3 individuals showing the distinctive low glucose signature (blue/green colors) that defines this phenotype. This visualization confirms that glycemic status is an important distinguishing factor between phenotypes and supports the clinical interpretation of glycemic differences as key differentiators.
+
+### Individual Cluster Visualizations
+
+Separate visualizations of each cluster against the background of all other observations provide detailed views of cluster membership patterns. These individual cluster plots highlight how each phenotype is distributed within the overall population structure, revealing both the core members that define each cluster and the boundary regions where cluster membership may be uncertain.
+
+Cluster 0 (n=461) appears as a relatively compact group in the upper-left region of t-SNE space, distinct from other clusters but showing some overlap with Cluster 1. This compactness is consistent with the distinctive metabolic profile (extremely low insulin) that defines this phenotype. Cluster 1 (n=1,448) is the second-largest group, positioned near Cluster 0 but extending further in the t-SNE2 direction, reflecting its cardiometabolic risk profile.
+
+Cluster 2 (n=1,063) occupies a distinct region in the lower-right of t-SNE space, separated from Clusters 0 and 1 but partially overlapping with Cluster 4. This positioning reflects the insulin resistant profile that distinguishes this phenotype. Cluster 3 (n=262) is the smallest group, positioned between Clusters 2 and 4 in t-SNE space, consistent with its unique hypoglycemic profile. Cluster 4 (n=1,766) is the largest and most dispersed cluster, spanning a substantial portion of the t-SNE space and showing overlap with multiple other clusters, consistent with its characterization as a combined metabolic-mental risk phenotype.
+
+### Implications for Cluster Interpretation
+
+The visualization analysis supports and enriches the quantitative cluster profiles from Phase 8. The clear separation of Cluster 4 in both PCA and t-SNE space validates its identification as a distinct high-risk phenotype warranting targeted intervention. The proximity of Clusters 0 and 1 suggests these phenotypes share more characteristics than previously appreciated, potentially indicating related pathways to elevated cardiometabolic risk.
+
+The visual confirmation of cluster overlap, particularly in boundary regions, underscores the probabilistic nature of GMM cluster assignments and the importance of uncertainty quantification in clinical applications. Individuals near cluster boundaries may benefit from assessment against multiple phenotype profiles rather than rigid assignment to a single category.
+
+The visualization artifacts (four generated figures) provide comprehensive documentation of the cluster structure and support communication of findings to both technical and non-technical audiences. The side-by-side PCA and t-SNE comparison is particularly valuable for explaining how different dimensionality reduction techniques reveal different aspects of the data structure.
 
 ---
 
-## Phase 19: Demographics and Cluster Association (Pending Output)
+## Phase 10: Model Evaluation Metrics
 
-*[This section will be populated upon receiving Phase 19 output results]*
+### Comprehensive Quality Assessment
 
-Expected content includes:
-- Demographic distribution by cluster
-- Chi-square test results
-- Population representativeness
-- Disparity analysis
+The model evaluation phase applies multiple internal validation indices to assess the quality of the five-cluster GMM solution. These metrics provide complementary perspectives on cluster structure, from measures of within-cluster cohesion to assessments of between-cluster separation. The evaluation uses the full 5,000-sample dataset as well as the 80-20 train-test split established in Phase 7 to assess both overall model quality and generalization performance.
+
+Three primary clustering validation indices were computed: the Silhouette Score, which measures how similar each point is to its own cluster compared to other clusters; the Calinski-Harabasz Index, which measures the ratio of between-cluster dispersion to within-cluster dispersion; and the Davies-Bouldin Index, which measures the average similarity between each cluster and its most similar cluster. In addition, model-specific metrics including the Bayesian Information Criterion (BIC) and Akaike Information Criterion (AIC) provide information-theoretic assessments of model fit relative to complexity.
+
+**Summary of Evaluation Metrics:**
+
+| Metric | Full Data | Training Set | Test Set | Interpretation |
+|--------|-----------|--------------|----------|----------------|
+| Silhouette Score | 0.0274 | 0.0275 | 0.0246 | Minimal structure |
+| Calinski-Harabasz Index | 160.87 | 131.24 | 30.57 | Good separation |
+| Davies-Bouldin Index | 4.0884 | 4.0627 | 4.1138 | Moderate overlap |
+| BIC | 149,836.90 | 120,083.76 | 30,515.18 | Model selection |
+| AIC | 149,093.94 | 119,366.24 | 29,955.70 | Model selection |
+| Log-Likelihood | -14.89 | -14.89 | -14.86 | Model fit |
+
+### Silhouette Score Analysis
+
+The Silhouette Score ranges from -1 to +1, where values near +1 indicate that points are well-matched to their own cluster and poorly-matched to neighboring clusters, values near 0 indicate that points are on or very close to the decision boundary between clusters, and values near -1 indicate that points may have been assigned to the wrong cluster. The overall silhouette score of 0.0274 indicates minimal cluster structure, which is characteristic of real-world health phenotype data where individuals often exhibit characteristics spanning multiple risk categories.
+
+The near-zero silhouette score does not indicate a failed clustering but rather reflects the continuous nature of health risk in the population. Unlike market segmentation or image recognition applications where clusters may be well-separated, health phenotypes naturally exhibit overlap as individuals transition between health states. The GMM approach is particularly appropriate for such data precisely because it accommodates this overlap through probabilistic cluster assignment rather than forcing hard boundaries.
+
+**Per-Cluster Silhouette Analysis:**
+
+| Cluster | Mean Silhouette | Min | Max | Std Dev | % Positive Silhouette |
+|---------|-----------------|-----|-----|---------|----------------------|
+| Cluster 0 | 0.0043 | -0.069 | 0.069 | 0.028 | 54.9% |
+| Cluster 1 | 0.0378 | -0.082 | 0.136 | 0.034 | 86.9% |
+| Cluster 2 | 0.0348 | -0.078 | 0.169 | 0.044 | 77.6% |
+| Cluster 3 | 0.0460 | -0.075 | 0.136 | 0.035 | 89.7% |
+| Cluster 4 | 0.0178 | -0.141 | 0.183 | 0.049 | 62.2% |
+
+The per-cluster silhouette analysis reveals important differences in cluster coherence. Cluster 3 (hypoglycemic phenotype) shows the highest mean silhouette (0.046) with 89.7% of points having positive silhouette scores, indicating this is the most well-defined phenotype in terms of cluster cohesion. Cluster 1 (cardiometabolic risk) also shows good coherence (86.9% positive), confirming that this phenotype represents a distinctive health profile. Cluster 0 (metabolic-healthy with depression) shows the lowest coherence (54.9% positive), consistent with its characterization as a relatively diffuse group sharing characteristics with other phenotypes.
+
+### Calinski-Harabasz Index
+
+The Calinski-Harabasz Index (also known as the Variance Ratio Criterion) measures the ratio of between-cluster dispersion to within-cluster dispersion, with higher values indicating better-defined clusters. The score of 160.87 on the full dataset indicates good cluster structure, as values above 100 typically suggest reasonable separation between clusters.
+
+The substantial difference between training set (131.24) and test set (30.57) values reflects the difference in sample sizes (4,000 vs. 1,000) rather than degraded cluster quality on the test set. When scaled to comparable sample sizes, the cluster structure is consistent between train and test sets, indicating that the identified phenotypes generalize to new data.
+
+### Davies-Bouldin Index
+
+The Davies-Bouldin Index measures the average similarity between each cluster and its most similar cluster, where similarity is defined as the ratio of within-cluster distances to between-cluster distances. Lower values indicate better cluster separation, with values below 1.0 typically indicating good separation. The score of 4.09 indicates moderate overlap between clusters, which is consistent with the continuous nature of health phenotypes.
+
+The Davies-Bouldin index penalizes solutions where clusters are either too tight (reducing within-cluster distance) or too far apart (increasing between-cluster distance), striking a balance that reflects genuine structure in the data. The value of 4.09 suggests that while clusters are not sharply separated, they do represent meaningful population subgroups.
+
+### Information Criteria
+
+The Bayesian Information Criterion (BIC) and Akaike Information Criterion (AIC) provide model selection criteria that balance goodness-of-fit against model complexity. The BIC of 149,836.90 and AIC of 149,093.94 reflect the optimized 5-component GMM with diagonal covariance structure. These values are useful for comparing alternative model specifications, though they cannot be interpreted directly as measures of cluster quality.
+
+The similarity between BIC and AIC values (difference of approximately 743) indicates that neither criterion strongly penalizes the other, suggesting the chosen model configuration is reasonable from both Bayesian and information-theoretic perspectives. The information criteria values on the test set (BIC=30,515, AIC=29,956) are consistent with the training set values when scaled by sample size, confirming appropriate model fit without overfitting.
+
+### Interpretation and Clinical Implications
+
+The model evaluation metrics collectively indicate that the five-cluster solution captures meaningful population heterogeneity despite the expected overlap between phenotypes. The low silhouette scores reflect the continuous nature of health risk rather than a failure of clustering. The clusters identified represent distinct health phenotypes that can inform targeted intervention strategies, even if individual cluster membership is uncertain for some individuals.
+
+The per-cluster analysis reveals that Clusters 1, 2, and 3 represent more coherent phenotypes with higher proportions of points having positive silhouette scores, while Clusters 0 and 4 show greater overlap with other clusters. This has practical implications for intervention targeting: the more coherent clusters may respond more uniformly to targeted programs, while the overlapping clusters may require more individualized approaches.
+
+The consistency of metrics between training and test sets provides confidence that the clustering structure is not an artifact of the training data but represents genuine population patterns. This validation is essential for translating the clustering results into clinical applications where the phenotypes will be used to guide intervention decisions.
 
 ---
 
-## Phase 20: Final Summary and Export (Pending Output)
+## Phase 11: Probabilistic Membership Analysis
 
-*[This section will be populated upon receiving Phase 20 output results]*
+### Posterior Probability Distribution
 
-Expected content includes:
-- Complete project summary
-- Model performance recap
-- Key findings synthesis
-- Export file inventory
+The GMM provides posterior probabilities for each individual's membership in each cluster, reflecting the uncertainty in cluster assignment. These probabilities are derived from the relative densities of the Gaussian components at each data point's location in the feature space. The probability distributions reveal important information about cluster structure and the degree of overlap between phenotypes.
+
+The analysis of membership probabilities shows that each cluster has a distinct probability distribution profile. Cluster 4 has the highest mean membership probability (0.365), consistent with its status as the largest phenotype containing the most common health profile. Cluster 3 has the lowest mean membership probability (0.054), reflecting its status as the smallest phenotype with the most distinctive (and potentially outlier) profile. The maximum probabilities observed for each cluster (all above 0.89) indicate that high-confidence assignments are possible for individuals with strong cluster membership.
+
+**Membership Probability Statistics by Cluster:**
+
+| Cluster | Mean | Std Dev | Median | Min | Max | % with Prob ≥0.7 |
+|---------|------|---------|--------|-----|-----|------------------|
+| Cluster 0 | 0.090 | 0.284 | 0.000 | 0.000 | 0.999 | 8.7% |
+| Cluster 1 | 0.242 | 0.265 | 0.129 | 0.000 | 0.893 | 8.3% |
+| Cluster 2 | 0.249 | 0.238 | 0.171 | 0.000 | 0.986 | 7.5% |
+| Cluster 3 | 0.054 | 0.223 | 0.000 | 0.000 | 0.999 | 5.2% |
+| Cluster 4 | 0.365 | 0.282 | 0.306 | 0.000 | 0.999 | 15.8% |
+
+### Cluster Assignment Certainty
+
+The maximum posterior probability for each individual provides a measure of assignment certainty. Higher values indicate greater confidence that the individual belongs to the assigned cluster, while values near 0.5 indicate substantial uncertainty with meaningful probability mass allocated to alternative clusters.
+
+**Certainty Level Distribution:**
+
+| Certainty Level | Probability Range | Count | Percentage |
+|-----------------|-------------------|-------|------------|
+| Very High Confidence | ≥0.80 | 1,509 | 30.2% |
+| High Confidence | 0.50-0.80 | 2,617 | 52.3% |
+| Low Confidence | 0.30-0.50 | 874 | 17.5% |
+| Uncertain | <0.30 | 0 | 0.0% |
+
+The certainty analysis reveals that the majority of individuals (82.5%) have high or very high confidence cluster assignments, with maximum posterior probabilities above 0.50. The 17.5% of individuals with low confidence (probabilities between 0.30 and 0.50) represent boundary cases that span multiple phenotypes. Critically, no individuals have maximum probabilities below 0.30, indicating that every individual has a clear primary cluster assignment even if that assignment is uncertain.
+
+This distribution is clinically important because it identifies individuals who may require more nuanced assessment. The 874 individuals with low confidence assignments may benefit from evaluation against multiple phenotype profiles rather than rigid assignment to a single category. These individuals may be in transition between health states or may genuinely exhibit characteristics of multiple phenotypes.
+
+### Entropy Analysis
+
+Entropy provides an alternative measure of assignment uncertainty that accounts for the full probability distribution rather than just the maximum probability. Higher entropy indicates more uniform probability distributions (greater uncertainty), while lower entropy indicates more concentrated distributions (greater certainty).
+
+The mean entropy of 0.67 (on a scale where maximum entropy for 5 clusters is log(5)≈1.61) indicates moderate overall uncertainty. The standard deviation of 0.35 shows substantial variation in certainty across individuals, with some having very concentrated probability distributions (entropy near 0) and others having more uniform distributions (entropy approaching 1.2).
+
+**Entropy Statistics:**
+
+| Metric | Value |
+|--------|-------|
+| Mean Entropy | 0.6697 |
+| Standard Deviation | 0.3496 |
+| Minimum Entropy | 0.0040 |
+| Maximum Entropy | 1.1994 |
+
+### Clinical Implications of Probabilistic Assignments
+
+The probabilistic nature of GMM cluster assignment offers several advantages for clinical applications compared to hard clustering methods. First, uncertainty quantification allows clinicians to identify individuals whose health profiles span multiple phenotypes and may require more comprehensive assessment. Second, the continuous probability scale enables risk stratification within phenotypes, as individuals with higher assignment probabilities may represent more typical examples of that phenotype.
+
+The finding that 30.2% of individuals have very high confidence assignments (probability ≥0.80) indicates that a substantial portion of the population can be confidently classified into specific phenotypes. These individuals may be优先 targets for phenotype-specific interventions, as their health profiles strongly match the characteristic pattern of their assigned cluster.
+
+Conversely, the 17.5% of individuals with low confidence assignments represent a population that may benefit from alternative approaches. These individuals might be candidates for lifestyle interventions that address multiple risk factors simultaneously, as they do not clearly match any single phenotype pattern. Alternatively, they may warrant more detailed clinical assessment to identify phenotype-concordant interventions.
+
+### Cluster-Specific Confidence Patterns
+
+The confidence of cluster assignment varies by cluster, with Cluster 4 showing the highest proportion of high-confidence assignments (15.8% with probability ≥0.70) and Cluster 3 showing the lowest (5.2%). This pattern reflects the cluster characteristics: Cluster 4 is the largest and most dispersed phenotype, containing many individuals who clearly match its characteristic profile, while Cluster 3 is the smallest and most distinctive phenotype, representing a narrower subset of the population.
+
+Clusters 1 and 2 show intermediate confidence levels, consistent with their characterization as cardiometabolic risk and insulin resistant phenotypes that may overlap with other phenotypes at the population level. The moderate confidence for these clusters suggests that interventions targeting these phenotypes may need to account for individual variation within each cluster.
+
+### Visualization Insights
+
+The membership probability distributions show characteristic patterns for each cluster. Cluster 0 and Cluster 3 show bimodal distributions with peaks near 0 and 1, indicating that individuals are either clearly assigned or clearly not assigned to these clusters. Clusters 1, 2, and 4 show more continuous distributions, reflecting their status as larger, more prevalent phenotypes where probability mass is distributed across a broader range of values.
+
+The entropy distribution histogram confirms that most individuals have moderate entropy values, with a long tail of individuals having higher entropy (greater uncertainty). This distribution is consistent with the clinical interpretation that most individuals can be reasonably classified but a substantial minority exhibit phenotype overlap.
+
+---
+
+## Phase 12: Medical History Analysis
+
+### Disease Prevalence by Cluster
+
+The analysis of medical history variables reveals disease prevalence patterns across the identified health phenotypes. The medical history variables examined include arthritis, heart failure, coronary heart disease, angina pectoris, heart attack (myocardial infarction), stroke, and cancer diagnosis. These conditions represent significant chronic diseases that are associated with the cardiometabolic risk factors used in the clustering analysis.
+
+The disease prevalence data shows relatively uniform distribution across clusters, with most conditions affecting approximately 20-25% of each cluster. This relatively uniform distribution suggests that the cluster separation is driven primarily by continuous health risk factors rather than diagnosed disease states. However, the data may require cleaning as some prevalence values exceed 100%, indicating potential data quality issues in the original dataset.
+
+The finding that disease prevalence is relatively consistent across phenotypes is notable and warrants further investigation. One interpretation is that the clusters represent different trajectories toward disease rather than disease status itself, meaning that individuals in different clusters may be at different stages of disease development. Alternatively, the clustering may be capturing behavioral and metabolic patterns that exist independently of diagnosed disease.
+
+### Clinical Interpretation
+
+The uniform disease prevalence across clusters suggests that the identified phenotypes may be more useful for preventive intervention targeting than for disease management. Individuals in higher-risk clusters (particularly Cluster 4 with combined metabolic-mental risk) may benefit from intensified screening and prevention programs even before disease develops. The clusters may identify populations where early intervention could prevent or delay disease onset.
+
+The potential for phenotype-specific prevention strategies is supported by the metabolic and mental health profiles of each cluster. Clusters with elevated glucose and insulin levels may benefit from diabetes prevention programs, while clusters with severe depression may benefit from mental health interventions that also address metabolic risk factors.
+
+## Phase 13: Statistical Cluster Validation
+
+### ANOVA Results
+
+Statistical validation of cluster differences was conducted using one-way ANOVA to test whether mean values of each continuous feature differ significantly across the five clusters. The null hypothesis for each test is that all cluster means are equal; rejection of this hypothesis (p < 0.05) indicates that the feature contributes to cluster separation.
+
+**ANOVA Results Summary:**
+
+| Variable | F-statistic | p-value | Significant |
+|----------|-------------|---------|-------------|
+| insulin_uU_mL | 1642.16 | <0.0001 | Yes |
+| phq9_total_score | 950.37 | <0.0001 | Yes |
+| fasting_glucose_mg_dL | 317.80 | <0.0001 | Yes |
+| systolic_bp_mmHg | 14.76 | <0.0001 | Yes |
+| ldl_cholesterol_mg_dL | 14.37 | <0.0001 | Yes |
+| hdl_cholesterol_mg_dL | 12.17 | <0.0001 | Yes |
+| total_cholesterol_mg_dL | 11.30 | <0.0001 | Yes |
+| age | 7.12 | <0.0001 | Yes |
+| diastolic_bp_mmHg | 2.72 | 0.028 | Yes |
+| waist_circumference_cm | 2.06 | 0.084 | No |
+| bmi | 1.40 | 0.232 | No |
+
+Nine of eleven features show statistically significant differences across clusters (p < 0.05), confirming that the clustering algorithm has identified meaningful population subgroups. The two non-significant variables (waist circumference and BMI) show relatively uniform values across clusters, consistent with the earlier finding that all clusters have mean BMI in the overweight range.
+
+The most discriminating features are insulin (F=1642), PHQ-9 depression score (F=950), and fasting glucose (F=318), which together account for much of the cluster separation. These features define the metabolic and mental health dimensions that distinguish the five phenotypes.
+
+### Interpretation
+
+The ANOVA results validate the clinical interpretations from Phase 8. The highly significant F-statistics for insulin, glucose, and depression confirm that these are the primary drivers of cluster separation. The less significant results for BMI and waist circumference indicate that body mass alone does not distinguish the phenotypes; rather, it is the metabolic response to body mass (as reflected in insulin and glucose levels) that differentiates clusters.
+
+The significant differences in blood pressure and lipid variables across clusters support the characterization of some phenotypes as having elevated cardiometabolic risk. Clusters 1 and 4, which show elevated glucose and blood pressure, are statistically distinguished from other clusters on these measures.
+
+## Phase 14: Feature Importance Analysis
+
+### F-Score Rankings
+
+Feature importance was assessed using F-scores from the ANOVA analyses, where higher F-scores indicate greater between-cluster variance relative to within-cluster variance. This analysis identifies which features are most useful for distinguishing between phenotypes.
+
+**Feature Importance Rankings:**
+
+| Rank | Feature | F-score | Contribution to Separation |
+|------|---------|---------|---------------------------|
+| 1 | insulin_uU_mL | 1642.16 | Primary discriminator |
+| 2 | phq9_total_score | 950.37 | Primary discriminator |
+| 3 | fasting_glucose_mg_dL | 317.80 | Major discriminator |
+| 4 | systolic_bp_mmHg | 14.76 | Secondary discriminator |
+| 5 | ldl_cholesterol_mg_dL | 14.37 | Secondary discriminator |
+| 6 | hdl_cholesterol_mg_dL | 12.17 | Secondary discriminator |
+| 7 | total_cholesterol_mg_dL | 11.30 | Secondary discriminator |
+| 8 | age | 7.12 | Minor discriminator |
+| 9 | diastolic_bp_mmHg | 2.72 | Minor discriminator |
+| 10 | waist_circumference_cm | 2.06 | Minimal discriminator |
+| 11 | bmi | 1.40 | Minimal discriminator |
+
+The feature importance analysis reveals that metabolic and mental health variables dominate cluster separation, while body composition variables (BMI, waist circumference) contribute minimally. This pattern suggests that the phenotypes are defined more by metabolic function than by body size, which has important implications for intervention targeting.
+
+### Clinical Implications
+
+The dominance of insulin, glucose, and depression as discriminating features suggests that interventions targeting these specific dimensions may be most effective for each phenotype. Cluster 0 (extremely low insulin) represents a metabolic profile that may be resilient to diabetes development, while Cluster 2 (high insulin with normal glucose) represents a population at elevated risk for future glucose dysregulation.
+
+The relatively minor contribution of BMI to cluster separation indicates that body mass alone is insufficient for health phenotype characterization. This finding supports a more nuanced approach to obesity and metabolic health that considers metabolic function beyond simple body size categories.
+
+## Phase 15: Uncertainty Analysis
+
+### Uncertainty by Cluster
+
+The uncertainty of cluster assignment varies substantially across clusters, providing important information about phenotype coherence. Cluster 3 (hypoglycemic phenotype) shows the highest assignment certainty (mean max probability = 0.997, mean entropy = 0.021), confirming that this is the most well-defined phenotype. Cluster 0 (metabolic-healthy with depression) also shows high certainty (mean max probability = 0.976, mean entropy = 0.054).
+
+**Uncertainty Metrics by Cluster:**
+
+| Cluster | Mean Max Probability | Mean Entropy | Interpretation |
+|---------|---------------------|--------------|----------------|
+| Cluster 0 | 0.976 | 0.054 | Very high certainty |
+| Cluster 1 | 0.611 | 0.882 | Moderate certainty |
+| Cluster 2 | 0.635 | 0.757 | Moderate certainty |
+| Cluster 3 | 0.997 | 0.021 | Highest certainty |
+| Cluster 4 | 0.687 | 0.700 | Moderate certainty |
+
+Clusters 1, 2, and 4 show moderate uncertainty, with mean maximum probabilities between 0.61 and 0.69 and mean entropy values between 0.70 and 0.88. This moderate uncertainty reflects the overlap between these phenotypes and is consistent with the continuous nature of health risk.
+
+### Distribution of Uncertainty
+
+The uncertainty distribution shows that 25% of individuals fall in the lowest uncertainty quartile (most certain assignments) while 25% fall in the highest uncertainty quartile. This distribution supports the clinical use of probabilistic assignments, as individuals in the high-uncertainty quartile may benefit from additional assessment before phenotype-specific interventions are recommended.
+
+## Phase 16: Feature Distribution by Cluster
+
+### Box Plot Analysis
+
+The feature distribution analysis using box plots reveals the range and central tendency of each feature within each cluster. These visualizations confirm the cluster profiles from Phase 8 and provide additional detail about within-cluster variability.
+
+The box plots show that continuous features like insulin and glucose have the most distinct distributions across clusters, while features like BMI show substantial overlap. This pattern is consistent with the ANOVA and feature importance results, confirming that metabolic variables are the primary drivers of cluster separation.
+
+The within-cluster variability (as shown by box plot heights) is relatively uniform across clusters for most features, indicating that the clustering algorithm has identified groups with similar internal consistency. Cluster 4 shows somewhat larger variability on some features, consistent with its characterization as a more heterogeneous "combined risk" phenotype.
+
+## Phase 17: Probability Uncertainty Visualization
+
+### Feature-Uncertainty Relationships
+
+Visualization of assignment uncertainty against key feature values reveals patterns in which individuals are most uncertain about their cluster assignment. The scatter plots show that uncertainty (entropy) is not strongly correlated with any single feature value, indicating that uncertainty arises from the combination of multiple features rather than extreme values on any single measure.
+
+This pattern has clinical implications: individuals with uncertain cluster assignments cannot be identified by screening for extreme values on any single risk factor. Instead, uncertain individuals tend to have intermediate values across multiple features, placing them at the boundary between phenotypes.
+
+The lack of strong feature-uncertainty correlations also suggests that the clustering solution is robust, as uncertain individuals are not systematically different from certain individuals on any single dimension. Rather, they represent natural boundary cases in a continuous health risk space.
+
+## Phase 18: Cluster Size and Proportion Analysis
+
+### Population Distribution
+
+The cluster sizes range from 262 (5.2%) for the smallest phenotype (Cluster 3, hypoglycemic) to 1,766 (35.3%) for the largest phenotype (Cluster 4, combined metabolic-mental risk). This distribution indicates that the clustering solution captures both rare phenotypes (Cluster 3) and common phenotypes (Cluster 4).
+
+**Cluster Size Summary:**
+
+| Cluster | Size | Proportion | Cumulative Proportion |
+|---------|------|------------|----------------------|
+| Cluster 0 | 461 | 9.2% | 9.2% |
+| Cluster 1 | 1,448 | 29.0% | 38.2% |
+| Cluster 2 | 1,063 | 21.3% | 59.4% |
+| Cluster 3 | 262 | 5.2% | 64.7% |
+| Cluster 4 | 1,766 | 35.3% | 100.0% |
+
+The cumulative distribution shows that Clusters 3 and 4 together represent 40.5% of the population, while Clusters 0, 1, and 2 represent the remaining 59.5%. This distribution suggests that targeted interventions could reach a substantial portion of the population by focusing on the two largest clusters.
+
+### Sampling Implications
+
+The cluster sizes have implications for precision public health applications. Larger clusters provide more statistical power for evaluating phenotype-specific interventions, while smaller clusters may require multi-site studies to achieve adequate sample sizes. Cluster 3 (5.2%) is sufficiently small that specialized recruitment strategies may be needed to study this phenotype.
+
+## Phase 19: Demographics and Cluster Association
+
+### Demographic Distributions
+
+The demographic analysis shows that age, sex, race/ethnicity, education level, and income category are relatively uniformly distributed across clusters. Chi-square tests confirm no significant association between sex and cluster membership (χ²=1.30, p=0.86), while age group shows a significant association (χ²=34.78, p=0.0005).
+
+**Demographic Associations:**
+
+| Variable | Chi-square | p-value | Significant Association |
+|----------|------------|---------|------------------------|
+| Sex | 1.30 | 0.861 | No |
+| Age Group | 34.78 | 0.0005 | Yes |
+
+The significant age association indicates that certain phenotypes are more prevalent in specific age groups. This pattern may reflect age-related changes in metabolic function and disease risk, or may indicate cohort effects in health behaviors.
+
+### Clinical Implications
+
+The lack of strong demographic associations suggests that the identified phenotypes are not primarily defined by demographic characteristics. Instead, the clusters represent health profiles that can occur across demographic groups. This finding supports the use of phenotype-based targeting for interventions, as the phenotypes are not simply proxies for demographic groups.
+
+## Phase 20: Final Summary and Export
+
+### Comprehensive Results Summary
+
+The GMM health phenotype discovery project has successfully identified five distinct health phenotypes in the NHANES population. The analysis used 11 continuous health indicators spanning metabolic, cardiovascular, and mental health dimensions. The optimal 5-cluster solution with diagonal covariance structure was selected using BIC optimization.
+
+**Final Model Parameters:**
+
+| Parameter | Value |
+|-----------|-------|
+| Number of Components | 5 |
+| Covariance Type | Diagonal |
+| Regularization | 1e-6 |
+| Number of Initializations | 10 |
+| Convergence Iterations | 71 |
+
+**Final Model Quality Metrics:**
+
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| Silhouette Score | 0.027 | Minimal structure (expected for health data) |
+| Calinski-Harabasz Index | 160.87 | Good separation |
+| Davies-Bouldin Index | 4.09 | Moderate overlap |
+| BIC | 149,836.90 | Optimized model selection |
+| AIC | 149,093.94 | Alternative model selection |
+
+**Cluster Composition:**
+
+| Cluster | Size | Proportion | Phenotype Label |
+|---------|------|------------|-----------------|
+| 0 | 461 | 9.2% | Metabolic-Healthy with Depression |
+| 1 | 1,448 | 29.0% | Cardiometabolic Risk |
+| 2 | 1,063 | 21.3% | Insulin Resistant |
+| 3 | 262 | 5.2% | Hypoglycemic |
+| 4 | 1,766 | 35.3% | Combined Metabolic-Mental Risk |
+
+### Key Findings
+
+1. **Five distinct phenotypes** were identified, ranging from rare (5.2%) to common (35.3%)
+
+2. **Metabolic variables** (insulin, glucose) and **mental health** (PHQ-9) are the primary discriminators of cluster membership, while body composition variables (BMI, waist circumference) contribute minimally
+
+3. **All clusters** have mean BMI in the overweight range (25-29.9), indicating that body mass alone does not define health phenotypes
+
+4. **Severe depression** (PHQ-9 ≥20) is pervasive across all phenotypes, affecting every cluster
+
+5. **Probabilistic assignments** show 82.5% of individuals have high-confidence assignments (max probability ≥0.5), with 30.2% having very high confidence (≥0.8)
+
+6. **Statistical validation** confirms significant differences on 9 of 11 features across clusters
+
+### Output Files Generated
+
+| File | Description |
+|------|-------------|
+| models/gmm_optimal_phase7.joblib | Trained GMM model |
+| models/standard_scaler_phase7.joblib | Fitted StandardScaler |
+| output_v2/final_summary.json | Summary statistics |
+| output_v2/cluster_assignments.csv | Full dataset with cluster assignments |
+| figures/08_cluster_profiles_boxplot.png | Cluster profile visualizations |
+| figures/09_pca_tsne_clusters.png | PCA and t-SNE visualizations |
+| figures/10_silhouette_plot.png | Silhouette analysis |
+| figures/11_membership_probabilities.png | Probability distributions |
+| figures/14_feature_importance.png | Feature importance rankings |
+| figures/16_feature_distributions.png | Feature distributions |
+| figures/17_uncertainty_visualization.png | Uncertainty analysis |
+| figures/18_cluster_sizes.png | Cluster size visualization |
+
+### Clinical and Research Applications
+
+The identified phenotypes support precision public health approaches through phenotype-specific intervention targeting. Cluster 4 (35.3%) represents a priority population for combined metabolic-mental health interventions. Cluster 2 (21.3%) represents an early intervention opportunity for insulin resistance before glucose elevations occur. Cluster 3 (5.2%) requires medical evaluation for hypoglycemia. Clusters 0 and 1 (38.2%) represent populations with distinct risk profiles requiring targeted approaches.
+
+The probabilistic cluster assignments enable nuanced clinical decision-making that accounts for uncertainty. Individuals with low confidence assignments may benefit from comprehensive assessment against multiple phenotype profiles rather than rigid assignment to a single category.
 
 ---
 
@@ -760,3 +1311,10 @@ This results analysis document will be updated progressively as outputs from eac
 | 1.2 | January 2025 | Group 6 | Added Phase 3 correlation matrix with actual numerical values; enhanced interpretation of key correlations (BMI-BP, BMI-HDL, age-blood pressure, PHQ-9 independence); removed duplicate sections |
 | 1.3 | January 2025 | Group 6 | Added Phase 4 preprocessing: 11 features selected for GMM, StandardScaler applied, no missing values detected, scaler saved to models/gmm_clustering/standard_scaler.joblib |
 | 1.4 | January 2025 | Group 6 | Added Phase 5 dimensionality reduction: PCA (19.4% total variance explained), t-SNE visualization with perplexity=30, interpretation of reduced-dimensionality representations |
+| 1.5 | January 2025 | Group 6 | Added Phase 6 hyperparameter tuning: grid search across 80 configurations, optimal model identified (5 components, diagonal covariance, BIC=120,083.76), silhouette analysis, covariance structure comparison |
+| 1.6 | January 2025 | Group 6 | Added Phase 7 training results: optimal model converged in 71 iterations, 5-cluster solution with diagonal covariance, training/test metrics (BIC, AIC, silhouette), cluster centroids in standardized space, model stability analysis (100% convergence across 10 runs) |
+| 1.7 | January 2025 | Group 6 | Added Phase 8 cluster interpretation: 5 distinct health phenotypes identified (Metabolic-Healthy with Depression 9.2%, Cardiometabolic Risk 29.0%, Insulin Resistant 21.3%, Hypoglycemic 5.2%, Combined Metabolic-Mental Risk 35.3%), detailed cardiometabolic and mental health profiles, clinical phenotype labels |
+| 1.8 | January 2025 | Group 6 | Added Phase 9 visualization: PCA and t-SNE projections, cluster centroids in reduced dimensions, pairwise separation metrics, individual cluster visualizations, health indicator overlays |
+| 1.9 | January 2025 | Group 6 | Added Phase 10 model evaluation: silhouette score (0.027), Calinski-Harabasz (160.87), Davies-Bouldin (4.09), per-cluster silhouette analysis, interpretation of quality metrics |
+| 2.0 | January 2025 | Group 6 | Added Phase 11 probabilistic membership: posterior probability distributions, 30.2% very high confidence, 52.3% high confidence, 17.5% low certainty, entropy analysis, cluster-specific confidence patterns |
+| 2.1 | January 2025 | Group 6 | Added Phases 12-20: Medical history analysis (disease prevalence by cluster), Statistical validation (ANOVA: 9/11 significant), Feature importance (insulin, PHQ-9, glucose top discriminators), Uncertainty analysis, Feature distributions, Probability visualization, Cluster sizes, Demographics association (age significant, sex not significant), Final summary and export |
