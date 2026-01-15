@@ -995,27 +995,125 @@ The dominance of insulin, glucose, and depression as discriminating features sug
 
 The relatively minor contribution of BMI to cluster separation indicates that body mass alone is insufficient for health phenotype characterization. This finding supports a more nuanced approach to obesity and metabolic health that considers metabolic function beyond simple body size categories.
 
-## Phase 15: Uncertainty Analysis
+## Phase 15: Uncertainty Analysis - Probability Distributions
 
-### Uncertainty by Cluster
+### Certainty Level Distribution Analysis
 
-The uncertainty of cluster assignment varies substantially across clusters, providing important information about phenotype coherence. Cluster 3 (hypoglycemic phenotype) shows the highest assignment certainty (mean max probability = 0.997, mean entropy = 0.021), confirming that this is the most well-defined phenotype. Cluster 0 (metabolic-healthy with depression) also shows high certainty (mean max probability = 0.976, mean entropy = 0.054).
+The uncertainty analysis provides crucial insights into the confidence of GMM cluster assignments, enabling assessment of the reliability of phenotype classifications for clinical and research applications. Unlike hard clustering methods that assign each observation to exactly one cluster, GMM provides probabilistic membership estimates that reflect the degree of overlap between phenotypes in the multidimensional feature space. This probabilistic approach is particularly valuable for health phenotype characterization, where individuals often exhibit characteristics spanning multiple risk categories and rigid classifications may oversimplify complex health profiles.
 
-**Uncertainty Metrics by Cluster:**
+The analysis of maximum posterior probabilities reveals the distribution of assignment certainty across all 5,000 respondents. Each individual's maximum probability represents the confidence that they belong to their assigned cluster relative to alternative clusters. Higher values indicate clearer phenotype assignment, while values closer to 0.5 (the minimum for any assigned cluster) indicate substantial overlap with other phenotypes.
 
-| Cluster | Mean Max Probability | Mean Entropy | Interpretation |
-|---------|---------------------|--------------|----------------|
-| Cluster 0 | 0.976 | 0.054 | Very high certainty |
-| Cluster 1 | 0.611 | 0.882 | Moderate certainty |
-| Cluster 2 | 0.635 | 0.757 | Moderate certainty |
-| Cluster 3 | 0.997 | 0.021 | Highest certainty |
-| Cluster 4 | 0.687 | 0.700 | Moderate certainty |
+**Certainty Distribution Summary:**
 
-Clusters 1, 2, and 4 show moderate uncertainty, with mean maximum probabilities between 0.61 and 0.69 and mean entropy values between 0.70 and 0.88. This moderate uncertainty reflects the overlap between these phenotypes and is consistent with the continuous nature of health risk.
+| Certainty Level | Probability Range | Count | Percentage |
+|-----------------|-------------------|-------|------------|
+| Very High Confidence | ≥80% | 1,509 | 30.2% |
+| High Confidence | 50-80% | 2,617 | 52.3% |
+| Low Confidence | 30-50% | 874 | 17.5% |
+| Very Low Confidence | <30% | 0 | 0.0% |
 
-### Distribution of Uncertainty
+The certainty distribution reveals important patterns for interpreting and applying the clustering results. A substantial majority of the population (82.5%) has high or very high confidence assignments, with maximum posterior probabilities exceeding 0.50. This indicates that most individuals can be classified into specific phenotypes with reasonable confidence, supporting the use of these phenotypes for population health targeting and intervention design.
 
-The uncertainty distribution shows that 25% of individuals fall in the lowest uncertainty quartile (most certain assignments) while 25% fall in the highest uncertainty quartile. This distribution supports the clinical use of probabilistic assignments, as individuals in the high-uncertainty quartile may benefit from additional assessment before phenotype-specific interventions are recommended.
+The 30.2% of individuals with very high confidence assignments (probability ≥0.80) represent the most typical examples of each phenotype. These individuals have health profiles that closely match the characteristic pattern of their assigned cluster and may be优先 targets for phenotype-specific interventions. The high-confidence group is likely to respond most uniformly to targeted programs because they most clearly represent the phenotype definition.
+
+The 52.3% of individuals with high confidence assignments (probability 50-80%) have clear but less definitive phenotype classifications. These individuals may share characteristics with their assigned cluster but also exhibit some features of alternative phenotypes. Interventions targeting this group may need to be more flexible to accommodate individual variation within the phenotype.
+
+The 17.5% of individuals with low confidence assignments (probability 30-50%) represent boundary cases that span multiple phenotypes. Critically, no individuals have maximum probabilities below 0.30, indicating that every individual has a clear primary cluster assignment even if that assignment is uncertain. The low-confidence group may benefit from more comprehensive assessment against multiple phenotype profiles rather than rigid assignment to a single category.
+
+### Entropy-Based Uncertainty Quantification
+
+Entropy provides a more sophisticated measure of assignment uncertainty that accounts for the full probability distribution rather than just the maximum probability. For a K-component GMM, maximum entropy occurs when probabilities are uniform across all clusters (1/K for each cluster), indicating complete uncertainty about cluster membership. Minimum entropy occurs when probability mass is concentrated in a single cluster, indicating high certainty.
+
+**Entropy Statistics:**
+
+| Metric | Value | Interpretation |
+|--------|-------|----------------|
+| Mean Entropy | 0.6697 | Moderate average uncertainty |
+| Standard Deviation | 0.3496 | Substantial variation across individuals |
+| Minimum Entropy | 0.0040 | Near-perfect certainty for some individuals |
+| Maximum Entropy | 1.1994 | Substantial uncertainty for boundary cases |
+
+The mean entropy of 0.67 on a scale where maximum entropy for 5 clusters is log(5)≈1.61 indicates moderate overall uncertainty in cluster assignments. This value is consistent with the continuous nature of health phenotypes, where clear boundaries between groups are rare and most individuals show some degree of overlap with adjacent phenotypes.
+
+The standard deviation of 0.35 reveals substantial variation in certainty across the population. Some individuals have very concentrated probability distributions (entropy near 0) with near-perfect cluster assignment certainty, while others have more uniform distributions (entropy approaching 1.2) indicating meaningful overlap between phenotypes. This variation supports the use of probabilistic rather than deterministic cluster assignments in clinical applications.
+
+The minimum entropy of 0.004 indicates that some individuals have essentially certain cluster assignments, with probability mass overwhelmingly concentrated in a single cluster. These individuals represent the clearest examples of each phenotype and may serve as reference cases for phenotype definition.
+
+The maximum entropy of 1.1994 indicates that the most uncertain individuals have probability distributions approaching uniformity, with meaningful probability mass allocated to multiple clusters. These individuals may be in transition between health states or may genuinely exhibit characteristics of multiple phenotypes.
+
+### Comprehensive Uncertainty Visualization
+
+The uncertainty analysis includes multiple complementary visualizations that characterize different aspects of assignment certainty. The visualization panel (08_uncertainty_analysis.png) presents four distinct views of the probability distributions and their implications for cluster interpretation.
+
+**Distribution of Maximum Probabilities:**
+
+The histogram of maximum cluster probabilities shows the frequency distribution of assignment certainty across the population. The visualization includes threshold lines at 0.80 (high confidence), 0.50 (medium confidence), and 0.30 (low confidence) that correspond to the categorical certainty levels. The distribution shows that most individuals have maximum probabilities above 0.50, with a long tail extending toward lower values.
+
+The histogram reveals the characteristic shape of GMM posterior probability distributions, which typically show concentration at high values (for clearly assigned individuals) and a more gradual decline toward lower values (for boundary cases). The absence of individuals below 0.30 indicates that the clustering solution successfully separates the population into distinct groups without creating ambiguous assignments.
+
+**Certainty Categories Pie Chart:**
+
+The pie chart visualization provides an intuitive summary of the certainty distribution, showing the relative proportions of each certainty category. The color scheme uses green for high confidence (≥80%), yellow for medium confidence (50-80%), orange for low confidence (30-50%), and red for very low confidence (<30%). The chart emphasizes that the majority of the population (82.5%) has high-confidence assignments while a smaller portion (17.5%) has uncertain classifications.
+
+The pie chart is particularly useful for communicating results to non-technical audiences, as it clearly shows the balance between certain and uncertain assignments without requiring interpretation of probability distributions.
+
+**Probability Distributions by Cluster:**
+
+The histogram overlay showing probability distributions for each cluster reveals the characteristic patterns of membership probability within each phenotype. Cluster 0 and Cluster 3 show bimodal distributions with peaks near 0 and 1, indicating that individuals are either clearly assigned or clearly not assigned to these clusters. This pattern is consistent with the smaller, more distinct phenotypes that have less overlap with other clusters.
+
+Clusters 1, 2, and 4 show more continuous distributions, reflecting their status as larger, more prevalent phenotypes where probability mass is distributed across a broader range of values. The larger clusters contain more individuals who are somewhat similar to the cluster profile but also share characteristics with adjacent phenotypes.
+
+The comparison of cluster-specific probability distributions helps explain why some clusters show higher internal coherence (bimodal distributions) while others show more variation (continuous distributions). This information is valuable for understanding the clinical interpretation of each phenotype and the likely response to phenotype-specific interventions.
+
+**Entropy Distribution Histogram:**
+
+The entropy distribution histogram shows how uncertainty is distributed across the population. The visualization includes a vertical line at the mean entropy value (0.6697) to enable quick identification of above-average and below-average uncertainty individuals.
+
+The histogram reveals that entropy is approximately normally distributed across the population, with most individuals showing moderate entropy values and fewer individuals showing either very high or very low entropy. This pattern is consistent with the clinical interpretation that most individuals can be reasonably classified but a substantial minority exhibit phenotype overlap requiring more nuanced assessment.
+
+### Clinical Implications of Probabilistic Assignments
+
+The probabilistic nature of GMM cluster assignment offers several advantages for clinical applications compared to hard clustering methods. First, uncertainty quantification allows clinicians to identify individuals whose health profiles span multiple phenotypes and may require more comprehensive assessment. Second, the continuous probability scale enables risk stratification within phenotypes, as individuals with higher assignment probabilities may represent more typical examples of that phenotype with more predictable response to targeted interventions.
+
+The finding that 30.2% of individuals have very high confidence assignments indicates that a substantial portion of the population can be confidently classified into specific phenotypes. These individuals may be ideal targets for phenotype-specific interventions, as their health profiles strongly match the characteristic pattern of their assigned cluster. Clinical programs could prioritize recruitment of high-confidence individuals to maximize intervention effectiveness.
+
+Conversely, the 17.5% of individuals with low confidence assignments represent a population that may benefit from alternative approaches. These individuals might be candidates for lifestyle interventions that address multiple risk factors simultaneously, as they do not clearly match any single phenotype pattern. Alternatively, they may warrant more detailed clinical assessment to identify phenotype-concordant interventions.
+
+### Cluster-Specific Confidence Patterns
+
+The confidence of cluster assignment varies by cluster, with certain phenotypes showing higher internal coherence than others. The probability distribution analysis by cluster reveals that smaller, more distinctive phenotypes (Clusters 0 and 3) show higher assignment certainty, while larger, more prevalent phenotypes (Clusters 1, 2, and 4) show more moderate certainty levels.
+
+Clusters 1 and 2 show intermediate confidence levels, consistent with their characterization as cardiometabolic risk and insulin resistant phenotypes that may overlap with other phenotypes at the population level. The moderate confidence for these clusters suggests that interventions targeting these phenotypes may need to account for individual variation within each cluster.
+
+Cluster 4, despite being the largest phenotype, shows moderate confidence levels. This reflects the combined metabolic-mental risk profile that characterizes this group, where individuals may show varying degrees of metabolic dysfunction and depression severity. The moderate certainty suggests that Cluster 4 represents a common but heterogeneous health pattern rather than a narrowly defined phenotype.
+
+### Data Export for Downstream Applications
+
+The uncertainty analysis results have been exported to CSV format for use in downstream applications and validation studies. The exported dataset includes respondent identifiers, cluster assignments, maximum probability values, entropy scores, and full probability vectors for all five clusters.
+
+**Uncertainty Metrics Export:**
+
+| Field | Description |
+|-------|-------------|
+| respondent_id | Unique respondent identifier |
+| cluster | Assigned cluster (maximum probability) |
+| max_probability | Maximum posterior probability |
+| entropy | Assignment entropy (uncertainty measure) |
+| cluster_0_probability | Probability of Cluster 0 membership |
+| cluster_1_probability | Probability of Cluster 1 membership |
+| cluster_2_probability | Probability of Cluster 2 membership |
+| cluster_3_probability | Probability of Cluster 3 membership |
+| cluster_4_probability | Probability of Cluster 4 membership |
+
+The complete probability vectors enable flexible application of the clustering results. Researchers can apply probability thresholds appropriate for their specific use case, whether requiring high-confidence assignments or incorporating uncertainty into statistical models. The entropy values enable identification of boundary cases for specialized analysis or follow-up assessment.
+
+### Interpretation Summary
+
+The uncertainty analysis confirms that the GMM clustering solution provides useful phenotype classifications for the majority of the population while appropriately identifying boundary cases that require more nuanced interpretation. The 82.5% high-confidence assignment rate supports the use of these phenotypes for population health targeting, while the 17.5% low-confidence group highlights the continuous nature of health risk in the population.
+
+The entropy analysis reveals that uncertainty varies substantially across individuals, with some having essentially certain assignments and others showing meaningful overlap between phenotypes. This variation is clinically meaningful and should inform how cluster assignments are used in research and clinical applications.
+
+The visualization outputs provide comprehensive documentation of the uncertainty structure and support communication of findings to diverse audiences. The pie chart and histogram visualizations are particularly useful for explaining the confidence of cluster assignments to non-technical stakeholders.
 
 ## Phase 16: Feature Distribution by Cluster
 
@@ -1318,3 +1416,4 @@ This results analysis document will be updated progressively as outputs from eac
 | 1.9 | January 2025 | Group 6 | Added Phase 10 model evaluation: silhouette score (0.027), Calinski-Harabasz (160.87), Davies-Bouldin (4.09), per-cluster silhouette analysis, interpretation of quality metrics |
 | 2.0 | January 2025 | Group 6 | Added Phase 11 probabilistic membership: posterior probability distributions, 30.2% very high confidence, 52.3% high confidence, 17.5% low certainty, entropy analysis, cluster-specific confidence patterns |
 | 2.1 | January 2025 | Group 6 | Added Phases 12-20: Medical history analysis (disease prevalence by cluster), Statistical validation (ANOVA: 9/11 significant), Feature importance (insulin, PHQ-9, glucose top discriminators), Uncertainty analysis, Feature distributions, Probability visualization, Cluster sizes, Demographics association (age significant, sex not significant), Final summary and export |
+| 2.2 | January 2025 | Group 6 | Enhanced Phase 15 Uncertainty Analysis with detailed certainty distribution (30.2% very high confidence, 52.3% high confidence, 17.5% low confidence), entropy statistics (mean=0.6697, std=0.3496), comprehensive probability distributions by cluster, and clinical implications for probabilistic phenotype assignments |
