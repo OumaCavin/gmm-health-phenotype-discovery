@@ -300,15 +300,76 @@ The exploratory data analysis findings have several direct implications for the 
 
 ---
 
-## Phase 4: Data Preprocessing for GMM (Pending Output)
+## Phase 4: Data Preprocessing for GMM Clustering
 
-*[This section will be populated upon receiving Phase 4 output results]*
+### Feature Selection Rationale
 
-Expected content includes:
-- Missing value handling strategy and results
-- Feature selection rationale and selected variables
-- Feature engineering (derived variables)
-- Standardization procedures and results
+The feature selection process identified 11 continuous health indicators that are most relevant for health phenotype discovery through Gaussian Mixture Model clustering. The selection prioritized variables that capture distinct dimensions of health status while maintaining clinical interpretability of resulting clusters. Features were chosen to represent cardiometabolic risk, metabolic function, and mental health, which together provide a multidimensional view of population health.
+
+The selected features span five conceptual domains that correspond to major health systems and risk factors. Demographic representation includes age, which is the primary non-modifiable risk factor for most chronic diseases. Body composition is captured through BMI and waist circumference, which together provide information about overall adiposity and central fat distribution. Cardiovascular function is represented by systolic and diastolic blood pressure, which indicate hypertension status and arterial health. Metabolic health is assessed through the complete lipid panel (total cholesterol, HDL, LDL) and glycemic markers (fasting glucose, insulin), which together capture metabolic syndrome components. Mental health is represented by the PHQ-9 total score, which provides a validated measure of depression severity.
+
+**Selected Features for GMM Clustering:**
+
+| # | Feature | Category | Clinical Relevance |
+|---|---------|----------|-------------------|
+| 1 | age | Demographics | Primary risk factor for chronic disease |
+| 2 | bmi | Body Composition | Primary obesity screening tool |
+| 3 | waist_circumference_cm | Body Composition | Central adiposity indicator |
+| 4 | systolic_bp_mmHg | Cardiovascular | Hypertension marker |
+| 5 | diastolic_bp_mmHg | Cardiovascular | Arterial pressure indicator |
+| 6 | total_cholesterol_mg_dL | Lipid Panel | Cardiovascular risk factor |
+| 7 | hdl_cholesterol_mg_dL | Lipid Panel | Protective cholesterol |
+| 8 | ldl_cholesterol_mg_dL | Lipid Panel | Atherogenic cholesterol |
+| 9 | fasting_glucose_mg_dL | Metabolic | Glycemic status marker |
+| 10 | insulin_uU_mL | Metabolic | Insulin resistance indicator |
+| 11 | phq9_total_score | Mental Health | Depression severity measure |
+
+### Missing Value Handling
+
+The preprocessing analysis confirmed that the 11 selected features contain no missing values across all 5,000 respondents. This complete data availability simplifies the clustering pipeline and ensures that all observations contribute to cluster estimation without the need for imputation strategies that might introduce bias or distort underlying data distributions.
+
+The absence of missing values in the selected feature subset contrasts with the broader dataset where missingness patterns were observed in laboratory variables. The fact that all selected features are complete suggests either that the preprocessing pipeline addressed missing values prior to feature selection, or that the chosen variables happen to be those with the most complete data in the original dataset. Either interpretation is consistent with appropriate data quality practices.
+
+### Feature Scaling
+
+Feature scaling is a critical preprocessing step for GMM clustering because the algorithm relies on distance calculations between data points. Without standardization, variables with larger scales (e.g., cholesterol in mg/dL, ranging from 100-334) would dominate distance calculations compared to variables with smaller scales (e.g., PHQ-9 scores ranging from 4-62), leading to biased cluster structures that overweigh high-magnitude variables.
+
+The StandardScaler method was applied to transform all features to have zero mean and unit variance. This transformation preserves the relative distribution of each variable while ensuring that all features contribute equally to distance calculations. The standardization formula is: z = (x - μ) / σ, where z is the standardized value, x is the original value, μ is the mean, and σ is the standard deviation.
+
+**Scaled Data Summary:**
+
+| Feature | Mean | Std | Min | Max |
+|---------|------|-----|-----|-----|
+| age | 0.0001 | 1.000 | -2.016 | 2.137 |
+| bmi | 0.0001 | 1.000 | -2.141 | 3.789 |
+| waist_circumference_cm | 0.0001 | 1.000 | -2.354 | 3.554 |
+| systolic_bp_mmHg | 0.0001 | 1.000 | -2.492 | 3.543 |
+| diastolic_bp_mmHg | 0.0001 | 1.000 | -2.932 | 3.549 |
+| total_cholesterol_mg_dL | -0.0001 | 1.000 | -2.592 | 3.485 |
+| hdl_cholesterol_mg_dL | -0.0001 | 1.000 | -2.033 | 3.408 |
+| ldl_cholesterol_mg_dL | -0.0001 | 1.000 | -2.036 | 3.759 |
+| fasting_glucose_mg_dL | -0.0001 | 1.000 | -1.693 | 3.834 |
+| insulin_uU_mL | -0.0001 | 1.000 | -1.468 | 3.731 |
+| phq9_total_score | -0.0001 | 1.000 | -2.420 | 3.639 |
+
+The scaled data summary confirms successful standardization, with mean values essentially zero (machine precision) and standard deviation exactly 1.0 for all features. The ranges of standardized values provide information about outliers and extreme observations. Features with larger standardized ranges (e.g., BMI ranging from -2.14 to 3.79, indicating more extreme values relative to the mean) may have greater influence on cluster structure, though this influence is now proportional to actual data variance rather than arbitrary scale differences.
+
+### Scaler Persistence
+
+The fitted StandardScaler was saved to disk for future use in preprocessing new data and ensuring reproducibility of the clustering results. The scaler file (standard_scaler.joblib) enables consistent transformation of any new data that might be analyzed using the same clustering model. This persistence is essential for deploying clustering models in production environments where new observations need to be classified into existing phenotypes.
+
+**Output Files Generated:**
+- Scaler file: output_v2/models/gmm_clustering/standard_scaler.joblib
+
+### Preprocessing Implications for Clustering
+
+The completed preprocessing establishes the foundation for GMM clustering with properly prepared features. The selected 11 features capture the major dimensions of health status relevant to phenotype discovery, with no missing values requiring imputation and all features scaled to contribute equally to distance calculations. The preprocessing decisions have several implications for subsequent clustering:
+
+**Feature Representation:** The 11 features represent a balanced selection across health domains, with 2 body composition features, 2 cardiovascular features, 3 lipid features, 2 metabolic features, 1 demographic feature, and 1 mental health feature. This distribution may lead to cluster structures that reflect cardiometabolic patterns most strongly, with mental health potentially emerging as a distinct dimension.
+
+**Scale Normalization:** The standardization ensures that no single health domain dominates cluster formation due to arbitrary scale differences. However, this also means that all features contribute proportionally to their natural variance in the population. Features with larger natural variance (e.g., blood pressure spanning ~80-190 mmHg) will have proportionally greater influence than features with smaller variance (e.g., HDL spanning ~20-100 mg/dL), which is appropriate for capturing meaningful health differences.
+
+**Missing Data Protocol:** Although the current data has no missing values, the preprocessing pipeline should include handling for future data that may have missingness. The median imputation strategy referenced in the analysis code provides a simple approach if needed, though more sophisticated methods like multiple imputation may be preferable for maintaining distributional properties.
 
 ---
 
@@ -649,14 +710,6 @@ where σ_i is the average distance from points in cluster i to the cluster centr
 
 ---
 
-## Document Control
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | January 2025 | Group 6 | Initial document creation, Phase 2 results |
-| 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, variable definitions and clinical context (42 variables across 7 categories), correlation analysis, missing value analysis |
-| 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, correlation analysis, missing value analysis |
-
 This results analysis document will be updated progressively as outputs from each analytical phase become available. The comprehensive structure ensures that all findings are documented with appropriate context and interpretation, supporting the development of a complete project report and presentation materials.
 
 ---
@@ -668,3 +721,4 @@ This results analysis document will be updated progressively as outputs from eac
 | 1.0 | January 2025 | Group 6 | Initial document creation, Phase 2 results |
 | 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, variable definitions and clinical context (42 variables across 7 categories), correlation analysis, missing value analysis |
 | 1.2 | January 2025 | Group 6 | Added Phase 3 correlation matrix with actual numerical values; enhanced interpretation of key correlations (BMI-BP, BMI-HDL, age-blood pressure, PHQ-9 independence); removed duplicate sections |
+| 1.3 | January 2025 | Group 6 | Added Phase 4 preprocessing: 11 features selected for GMM, StandardScaler applied, no missing values detected, scaler saved to models/gmm_clustering/standard_scaler.joblib |
