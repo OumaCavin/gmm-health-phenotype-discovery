@@ -1,0 +1,243 @@
+# =============================================================================
+# PHASE 13: MODEL SELECTION - BIC/AIC CURVES
+# =============================================================================
+
+print("=" * 70)
+print("MODEL SELECTION: COMPREHENSIVE GMM EVALUATION")
+print("=" * 70)
+
+# Import additional metrics
+from sklearn.mixture import GaussianMixture
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+import numpy as np
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
+
+# Define cluster range to evaluate
+n_components_range = range(2, 16)
+
+# Storage for metrics
+bic_scores = []
+aic_scores = []
+silhouette_scores = []
+calinski_scores = []
+davies_bouldin_scores = []
+
+print(f"\n[INFO] Evaluating models with k=2 to k=15 clusters...")
+print("-" * 70)
+print(f"{'k':^4} | {'BIC':^12} | {'AIC':^12} | {'Silhouette':^12} | {'Calinski':^12} | {'Davies':^10}")
+print("-" * 70)
+
+for n_components in n_components_range:
+    # Create and fit GMM
+    gmm_temp = GaussianMixture(
+        n_components=n_components,
+        covariance_type='full',
+        n_init=5,
+        random_state=42,
+        max_iter=200,
+        reg_covar=1e-6
+    )
+    gmm_temp.fit(X_scaled)
+    
+    # Get predictions
+    labels_temp = gmm_temp.predict(X_scaled)
+    
+    # Calculate all metrics
+    bic = gmm_temp.bic(X_scaled)
+    aic = gmm_temp.aic(X_scaled)
+    silhouette = silhouette_score(X_scaled, labels_temp)
+    calinski = calinski_harabasz_score(X_scaled, labels_temp)
+    davies = davies_bouldin_score(X_scaled, labels_temp)
+    
+    # Store scores
+    bic_scores.append(bic)
+    aic_scores.append(aic)
+    silhouette_scores.append(silhouette)
+    calinski_scores.append(calinski)
+    davies_bouldin_scores.append(davies)
+    
+    # Print progress
+    print(f"{n_components:^4} | {bic:^12.2f} | {aic:^12.2f} | {silhouette:^12.4f} | {calinski:^12.2f} | {davies:^10.4f}")
+
+print("-" * 70)
+
+# Find optimal number of components for each metric
+best_bic_n = list(n_components_range)[np.argmin(bic_scores)]
+best_aic_n = list(n_components_range)[np.argmin(aic_scores)]
+best_silhouette_n = list(n_components_range)[np.argmax(silhouette_scores)]
+best_calinski_n = list(n_components_range)[np.argmax(calinski_scores)]
+best_davies_n = list(n_components_range)[np.argmin(davies_bouldin_scores)]
+
+print(f"\n[INFO] OPTIMAL COMPONENTS BY METRIC:")
+print(f"  • BIC (lower is better):          k = {best_bic_n}")
+print(f"  • AIC (lower is better):          k = {best_aic_n}")
+print(f"  • Silhouette (higher is better):  k = {best_silhouette_n}")
+print(f"  • Calinski-Harabasz (higher is better): k = {best_calinski_n}")
+print(f"  • Davies-Bouldin (lower is better):    k = {best_davies_n}")
+
+# Use best_params from previous analysis
+optimal_k = best_params['n_components']
+print(f"\n[INFO] SELECTED OPTIMAL K: {optimal_k} (from best_params)")
+
+# Create comprehensive visualization
+fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+fig.suptitle('GMM Model Selection Analysis\nEvaluating Clusters k=2 to k=15', 
+             fontsize=16, fontweight='bold', y=1.02)
+
+# Plot 1: BIC and AIC curves
+ax1 = axes[0, 0]
+ax1.plot(list(n_components_range), bic_scores, 'b-o', linewidth=2, markersize=8, label='BIC')
+ax1.plot(list(n_components_range), aic_scores, 'r-s', linewidth=2, markersize=8, label='AIC')
+ax1.axvline(x=optimal_k, color='green', linestyle='--', linewidth=2, label=f'Selected k={optimal_k}')
+ax1.axvline(x=best_bic_n, color='blue', linestyle=':', alpha=0.7, label=f'Best BIC={best_bic_n}')
+ax1.axvline(x=best_aic_n, color='red', linestyle=':', alpha=0.7, label=f'Best AIC={best_aic_n}')
+ax1.set_xlabel('Number of Clusters (k)', fontsize=12)
+ax1.set_ylabel('Information Criterion Score', fontsize=12)
+ax1.set_title('BIC and AIC\n(Lower is Better)', fontsize=14, fontweight='bold')
+ax1.legend(fontsize=9, loc='best')
+ax1.grid(True, alpha=0.3)
+ax1.set_xticks(list(n_components_range))
+
+# Plot 2: Silhouette Score
+ax2 = axes[0, 1]
+ax2.plot(list(n_components_range), silhouette_scores, 'g-^', linewidth=2, markersize=8, color='darkgreen')
+ax2.axvline(x=optimal_k, color='red', linestyle='--', linewidth=2, label=f'Selected k={optimal_k}')
+ax2.axvline(x=best_silhouette_n, color='green', linestyle=':', alpha=0.7, label=f'Best k={best_silhouette_n}')
+ax2.fill_between(list(n_components_range), silhouette_scores, alpha=0.2, color='green')
+ax2.set_xlabel('Number of Clusters (k)', fontsize=12)
+ax2.set_ylabel('Silhouette Score', fontsize=12)
+ax2.set_title('Silhouette Score\n(Higher is Better)', fontsize=14, fontweight='bold')
+ax2.legend(fontsize=10)
+ax2.grid(True, alpha=0.3)
+ax2.set_xticks(list(n_components_range))
+
+# Plot 3: Calinski-Harabasz Index
+ax3 = axes[0, 2]
+ax3.plot(list(n_components_range), calinski_scores, 'm-v', linewidth=2, markersize=8, color='purple')
+ax3.axvline(x=optimal_k, color='red', linestyle='--', linewidth=2, label=f'Selected k={optimal_k}')
+ax3.axvline(x=best_calinski_n, color='purple', linestyle=':', alpha=0.7, label=f'Best k={best_calinski_n}')
+ax3.fill_between(list(n_components_range), calinski_scores, alpha=0.2, color='purple')
+ax3.set_xlabel('Number of Clusters (k)', fontsize=12)
+ax3.set_ylabel('Calinski-Harabasz Index', fontsize=12)
+ax3.set_title('Calinski-Harabasz Index\n(Higher is Better)', fontsize=14, fontweight='bold')
+ax3.legend(fontsize=10)
+ax3.grid(True, alpha=0.3)
+ax3.set_xticks(list(n_components_range))
+
+# Plot 4: Davies-Bouldin Index
+ax4 = axes[1, 0]
+ax4.plot(list(n_components_range), davies_bouldin_scores, 'c-d', linewidth=2, markersize=8, color='teal')
+ax4.axvline(x=optimal_k, color='red', linestyle='--', linewidth=2, label=f'Selected k={optimal_k}')
+ax4.axvline(x=best_davies_n, color='teal', linestyle=':', alpha=0.7, label=f'Best k={best_davies_n}')
+ax4.fill_between(list(n_components_range), davies_bouldin_scores, alpha=0.2, color='teal')
+ax4.set_xlabel('Number of Clusters (k)', fontsize=12)
+ax4.set_ylabel('Davies-Bouldin Index', fontsize=12)
+ax4.set_title('Davies-Bouldin Index\n(Lower is Better)', fontsize=14, fontweight='bold')
+ax4.legend(fontsize=10)
+ax4.grid(True, alpha=0.3)
+ax4.set_xticks(list(n_components_range))
+
+# Plot 5: Combined normalized metrics
+ax5 = axes[1, 1]
+# Normalize all metrics to [0, 1] for comparison
+bic_norm = (np.array(bic_scores) - min(bic_scores)) / (max(bic_scores) - min(bic_scores))
+aic_norm = (np.array(aic_scores) - min(aic_scores)) / (max(aic_scores) - min(aic_scores))
+sil_norm = (np.array(silhouette_scores) - min(silhouette_scores)) / (max(silhouette_scores) - min(silhouette_scores))
+calinski_norm = (np.array(calinski_scores) - min(calinski_scores)) / (max(calinski_scores) - min(calinski_scores))
+davies_norm = (np.array(davies_bouldin_scores) - min(davies_bouldin_scores)) / (max(davies_bouldin_scores) - min(davies_bouldin_scores))
+
+# For lower-is-better metrics, invert so higher is better
+bic_norm_inv = 1 - bic_norm
+aic_norm_inv = 1 - aic_norm
+davies_norm_inv = 1 - davies_norm
+
+# Calculate composite score
+composite = (bic_norm_inv + aic_norm_inv + sil_norm + calinski_norm + davies_norm_inv) / 5
+
+ax5.plot(list(n_components_range), bic_norm_inv, 'b--', linewidth=1.5, alpha=0.6, label='BIC (inv)')
+ax5.plot(list(n_components_range), aic_norm_inv, 'r--', linewidth=1.5, alpha=0.6, label='AIC (inv)')
+ax5.plot(list(n_components_range), sil_norm, 'g-', linewidth=2, label='Silhouette')
+ax5.plot(list(n_components_range), calinski_norm, 'm-', linewidth=2, label='Calinski')
+ax5.plot(list(n_components_range), davies_norm_inv, 'c--', linewidth=1.5, alpha=0.6, label='Davies (inv)')
+ax5.plot(list(n_components_range), composite, 'k-', linewidth=3, label='Composite Score')
+ax5.axvline(x=optimal_k, color='red', linestyle='--', linewidth=2, label=f'Selected k={optimal_k}')
+ax5.set_xlabel('Number of Clusters (k)', fontsize=12)
+ax5.set_ylabel('Normalized Score (0-1)', fontsize=12)
+ax5.set_title('Normalized Metrics Comparison\n(Higher is Better for All)', fontsize=14, fontweight='bold')
+ax5.legend(fontsize=8, loc='best', ncol=2)
+ax5.grid(True, alpha=0.3)
+ax5.set_xticks(list(n_components_range))
+
+# Plot 6: Summary table
+ax6 = axes[1, 2]
+ax6.axis('off')
+summary_text = f"""
+MODEL SELECTION SUMMARY
+{'='*40}
+
+Dataset: X_scaled ({X_scaled.shape[0]:,} samples, {X_scaled.shape[1]} features)
+
+Cluster Range Tested: k = 2 to 15
+
+OPTIMAL K BY METRIC:
+  • BIC:          k = {best_bic_n}
+  • AIC:          k = {best_aic_n}
+  • Silhouette:   k = {best_silhouette_n}
+  • Calinski:     k = {best_calinski_n}
+  • Davies:       k = {best_davies_n}
+
+SELECTED OPTIMAL K: {optimal_k}
+
+METRICS AT k={optimal_k}:
+  • BIC Score:          {bic_scores[optimal_k-2]:.2f}
+  • AIC Score:          {aic_scores[optimal_k-2]:.2f}
+  • Silhouette Score:   {silhouette_scores[optimal_k-2]:.4f}
+  • Calinski-Harabasz:  {calinski_scores[optimal_k-2]:.2f}
+  • Davies-Bouldin:     {davies_bouldin_scores[optimal_k-2]:.4f}
+"""
+ax6.text(0.1, 0.95, summary_text, transform=ax6.transAxes, fontsize=11,
+         verticalalignment='top', fontfamily='monospace',
+         bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+
+plt.tight_layout()
+
+# Ensure output directory exists
+import os
+os.makedirs('output_v2/figures/plots/', exist_ok=True)
+
+# Save figure
+plt.savefig('output_v2/figures/plots/06_bic_aic_analysis.png', dpi=300, bbox_inches='tight')
+plt.show()
+
+print(f"\n[OK] Figure saved: output_v2/figures/plots/06_bic_aic_analysis.png")
+
+# Save detailed results to CSV
+model_selection_df = pd.DataFrame({
+    'n_components': list(n_components_range),
+    'bic_score': bic_scores,
+    'aic_score': aic_scores,
+    'silhouette_score': silhouette_scores,
+    'calinski_harabasz_index': calinski_scores,
+    'davies_bouldin_index': davies_bouldin_scores,
+    'optimal_by_bic': [n == best_bic_n for n in n_components_range],
+    'optimal_by_aic': [n == best_aic_n for n in n_components_range],
+    'optimal_by_silhouette': [n == best_silhouette_n for n in n_components_range],
+    'optimal_by_calinski': [n == best_calinski_n for n in n_components_range],
+    'optimal_by_davies': [n == best_davies_n for n in n_components_range]
+})
+
+path = os.path.join(OUTPUT_SUBDIRS['metrics'], 'model_selection_results.csv')
+model_selection_df.to_csv(path, index=False)
+print(f"[OK] Results saved: {path}")
+
+
+# Print final summary
+print("\n" + "=" * 70)
+print("MODEL SELECTION COMPLETE")
+print("=" * 70)
+print(f"\nSelected optimal number of clusters: k = {optimal_k}")
+print(f"\nMetrics saved to: output_v2/metrics/model_selection_results.csv")
+print(f"Visualization saved to: output_v2/figures/plots/06_bic_aic_analysis.png")
+print("=" * 70)
