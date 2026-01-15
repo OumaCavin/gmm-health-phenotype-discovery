@@ -132,7 +132,51 @@ The generated distribution visualization (01_health_indicator_distributions.png)
 
 The distribution plots serve as a baseline for subsequent phases, particularly for validating that the identified clusters represent genuine subgroups rather than artifacts of preprocessing. If clusters emerge that do not correspond to visible multimodality in the univariate distributions, this may indicate that clusters are defined by multivariate relationships rather than extreme values on any single variable.
 
-### Correlation Analysis
+### Variable Definitions and Clinical Context
+
+A comprehensive variable definition and clinical context analysis was conducted to ensure proper interpretation of all 42 health variables included in the clustering analysis. This systematic documentation provides essential background for understanding the clinical meaning of each variable and establishes appropriate reference ranges for subsequent phenotype characterization. The variable documentation enables meaningful interpretation of cluster profiles and ensures that clinical conclusions are grounded in established medical knowledge.
+
+The documented variables span seven conceptual categories that together capture the multidimensional nature of health status. Each category represents a distinct aspect of health that contributes uniquely to phenotype characterization. The comprehensive variable coverage enables identification of complex health patterns that may not be apparent from any single health dimension.
+
+**Variable Category Summary:**
+
+| Category | Count | Examples | Clinical Significance |
+|----------|-------|----------|----------------------|
+| Demographic Variables | 5 | Sex, Age, Race/Ethnicity, Education, Income | Social determinants and confounders |
+| Body Measurements | 4 | Weight, Height, BMI, Waist Circumference | Nutritional status and adiposity |
+| Blood Pressure | 2 | Systolic BP, Diastolic BP | Cardiovascular function |
+| Laboratory Values | 5 | Cholesterol, HDL, LDL, Glucose, Insulin | Metabolic health markers |
+| Behavioral Factors | 8 | Smoking, Alcohol, Physical Activity | Modifiable risk factors |
+| Medical History | 8 | Heart Disease, Diabetes, Cancer | Clinical diagnoses |
+| Mental Health (PHQ-9) | 10 | Depression symptoms | Psychological well-being |
+
+**Demographic Variables:** These foundational variables provide essential context for health analysis and may serve as both clustering features and stratifying variables. Biological sex influences cardiovascular disease risk patterns, metabolic profiles, and disease prevalence rates. Age is the primary risk factor for most chronic diseases, with cardiovascular risk increasing exponentially after age 40. Race and ethnicity categories capture health disparities related to social determinants and potential genetic factors, though these should be interpreted carefully to avoid perpetuating biological essentialism. Education level and income category are strong social determinants of health, influencing access to healthcare, nutritious food, and healthy living environments.
+
+**Body Measurement Variables:** These anthropometric indicators provide objective assessment of nutritional status and body composition. Body Mass Index serves as the primary screening tool for obesity, though its limitations include inability to distinguish between lean mass and fat mass. Waist circumference is a superior predictor of cardiovascular risk than BMI alone, as it specifically indicates central adiposity, which is more metabolically active and associated with greater cardiovascular risk. The combination of BMI and waist circumference provides complementary information about body composition.
+
+**Blood Pressure Variables:** Systolic and diastolic blood pressure measurements capture cardiovascular function and hypertension status. Hypertension is a major modifiable risk factor for stroke, heart disease, and kidney failure. The sustained elevation of blood pressure above normal thresholds (typically 130/80 mmHg according to recent guidelines) indicates need for lifestyle intervention or pharmacological treatment.
+
+**Laboratory Variables:** These biochemical markers provide objective assessment of metabolic health. Total cholesterol, HDL cholesterol, and LDL cholesterol collectively characterize lipid metabolism and cardiovascular risk. HDL cholesterol is protective, with higher levels associated with lower cardiovascular disease risk. LDL cholesterol is the primary target of cholesterol-lowering therapy due to its atherogenic properties. Fasting glucose and insulin levels indicate glycemic status and pancreatic beta-cell function, with elevated values signaling insulin resistance and prediabetic or diabetic states.
+
+**Behavioral Variables:** These variables capture modifiable health behaviors that significantly influence chronic disease risk. Smoking history and intensity are key risk factors for lung cancer, COPD, and cardiovascular disease. Alcohol consumption patterns affect liver disease, cancer, and cardiovascular risk in a dose-dependent manner. Physical activity levels (both occupational and recreational) are protective factors that reduce cardiovascular disease, diabetes, and mortality risk.
+
+**Medical History Variables:** These self-reported physician diagnoses provide clinical validation for the statistical phenotypes. Conditions including heart failure, coronary heart disease, angina, heart attack, stroke, arthritis, and cancer represent clinically significant disease states that should be reflected in the clustering structure. The general health rating provides a subjective assessment that integrates physical, mental, and functional health perceptions.
+
+**Mental Health Variables (PHQ-9):** The Patient Health Questionnaire-9 provides a validated measure of depression severity. The nine items assess core depression symptoms including anhedonia, depressed mood, sleep disturbance, fatigue, appetite changes, feelings of worthlessness, concentration difficulties, psychomotor changes, and suicidal ideation. The total score ranges from 0 to 27 with established clinical thresholds: none (0-4), mild (5-9), moderate (10-14), moderately severe (15-19), and severe (20-27). Mental health is increasingly recognized as integral to comprehensive health phenotype characterization, as depression frequently co-occurs with chronic physical conditions.
+
+**Clinical Context for GMM Analysis:**
+
+Understanding the clinical meaning of each variable is essential for appropriate analysis and interpretation of NHANES health data. The GMM clustering approach will identify statistical subpopulations, but clinical interpretation requires understanding how these statistical groups correspond to meaningful health phenotypes. Several clinical considerations are particularly relevant for the GMM analysis:
+
+**Cardiovascular Risk Factors:** The core cardiometabolic risk profile includes BMI, blood pressure, cholesterol levels, and glucose metabolism. These variables are known to cluster together in metabolic syndrome, a constellation of abnormalities that substantially increases cardiovascular disease risk. The clustering analysis may identify distinct risk strata corresponding to healthy, at-risk, and metabolic syndrome phenotypes.
+
+**Mental Health Integration:** Depression often co-occurs with chronic physical conditions through bidirectional relationships. The clustering analysis may reveal mind-body health connections, with certain phenotypes showing elevated depression symptoms alongside physical health risk factors.
+
+**Behavioral Patterns:** Health behaviors including smoking, alcohol consumption, and physical activity tend to cluster in predictable lifestyle patterns. The clustering analysis may identify lifestyle phenotypes with characteristic behavioral profiles and corresponding health outcomes.
+
+**Comorbidity Patterns:** Disease history provides clinical validation for statistical clusters. The identified phenotypes should reflect known disease patterns, with higher-risk clusters showing elevated prevalence of cardiovascular disease, diabetes, and other chronic conditions.
+
+The variable definitions and clinical context establish the foundation for meaningful interpretation of clustering results. Each cluster profile can be characterized in terms of its clinical features, risk factor burden, and potential intervention targets.
 
 The correlation analysis reveals the bivariate relationships among key health indicators, which is critical for understanding the multivariate structure of the data and informing feature selection decisions for clustering. Understanding these correlations helps identify which health dimensions are most influential for cluster separation and whether dimensionality reduction may be beneficial.
 
@@ -613,6 +657,7 @@ where σ_i is the average distance from points in cluster i to the cluster centr
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | January 2025 | Group 6 | Initial document creation, Phase 2 results |
+| 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, variable definitions and clinical context (42 variables across 7 categories), correlation analysis, missing value analysis |
 | 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, correlation analysis, missing value analysis |
 
 This results analysis document will be updated progressively as outputs from each analytical phase become available. The comprehensive structure ensures that all findings are documented with appropriate context and interpretation, supporting the development of a complete project report and presentation materials.
