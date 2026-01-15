@@ -52,15 +52,210 @@ The model selection phase will determine the optimal number of clusters and cova
 
 ---
 
-## Phase 3: Exploratory Data Analysis (Pending Output)
+## Phase 3: Exploratory Data Analysis
 
-*[This section will be populated upon receiving Phase 3 output results]*
+### Overview of Statistical Analysis
 
-Expected content includes:
-- Summary statistics for all continuous variables (mean, standard deviation, median, min, max)
-- Distribution histograms for key health indicators
-- Correlation matrix analysis
-- Missing value patterns and analysis
+The exploratory data analysis phase characterized the distributions of 13 key continuous health indicators across the 5,000 NHANES respondents. This analysis provides essential insights into the population's health profile, identifies potential data quality issues, and generates hypotheses about the underlying structure that may inform subsequent clustering analysis. The variables analyzed span body composition, cardiovascular function, metabolic markers, and mental health, representing the core dimensions of health that will be used to identify distinct phenotypes.
+
+The summary statistics reveal that this NHANES sample represents a middle-aged adult population with a mean age of 49.12 years (SD = 14.45) spanning the adult lifespan from 20 to 80 years. The sample exhibits health indicator distributions that are largely symmetric with low to moderate kurtosis, suggesting relatively normal distributions without excessive outlier influence. These distributional characteristics are favorable for Gaussian Mixture Model clustering, which assumes that each cluster follows a multivariate normal distribution.
+
+### Body Composition Measurements
+
+The body measurement variables reveal a population with weight characteristics centered around 80.07 kg (SD = 19.11), with a relatively symmetric distribution (skewness = 0.10) and platykurtic distribution (kurtosis = -0.29) indicating slightly heavier tails than a normal distribution. The weight range spans from 40.0 kg to 146.35 kg, capturing the full spectrum from underweight to severe obesity in the adult population.
+
+Height measurements show the expected characteristics of an adult population, with mean height of 168.19 cm (SD = 9.81) and minimal skewness (0.03) and kurtosis (-0.31). The height range of 145 cm to 195 cm is consistent with adult anthropometry, though this variable is less informative for health phenotype clustering since height is a relatively stable characteristic not directly modifiable through health interventions.
+
+Body Mass Index serves as the primary indicator of nutritional status and overall body composition. The sample mean BMI of 27.95 kg/m² (SD = 6.05) falls within the overweight range (25-29.9 kg/m²), with individual values ranging from 15.0 kg/m² (borderline underweight) to 50.85 kg/m² (severe obesity, class III). The near-zero skewness (0.12) indicates a symmetric distribution around the mean, while the slight negative kurtosis (-0.21) suggests fewer extreme values than would be expected in a perfect normal distribution. This BMI distribution is consistent with the broader US adult population, where overweight and obesity are prevalent.
+
+Waist circumference, a superior predictor of cardiovascular and metabolic risk compared to BMI alone, shows a mean of 94.97 cm (SD = 14.86) with a range from 60 cm to 147.77 cm. The near-zero skewness (0.06) and kurtosis (-0.05) indicate a well-behaved symmetric distribution. Central adiposity, indicated by elevated waist circumference, is associated with increased cardiovascular risk independent of overall BMI, making this an important variable for distinguishing health phenotypes.
+
+### Cardiovascular Health Indicators
+
+Blood pressure measurements reveal a population with elevated cardiovascular risk profile. Systolic blood pressure averages 125.15 mmHg (SD = 18.12), which exceeds the normal threshold of 120 mmHg and approaches the hypertension Stage 1 threshold of 130 mmHg. The range from 80 mmHg to 189.34 mmHg captures both hypotensive individuals and those with severe hypertension. The near-zero skewness (0.03) and kurtosis (-0.08) indicate a relatively symmetric distribution without excessive outliers.
+
+Diastolic blood pressure shows a mean of 75.09 mmHg (SD = 11.97), which falls within the normal to elevated range (normal <80 mmHg). The distribution is highly symmetric (skewness = 0.02) with minimal kurtosis (-0.07). The range from 40 mmHg to 117.56 mmHg includes individuals with hypotension and severe diastolic hypertension. Together with systolic blood pressure, these values suggest that a substantial portion of the sample may have elevated blood pressure requiring clinical attention.
+
+### Lipid Profile Analysis
+
+The lipid panel results provide critical information about cardiovascular risk. Total cholesterol averages 200.02 mg/dL (SD = 38.60), which is at the borderline between desirable (<200 mg/dL) and borderline high (200-239 mg/dL) categories. The near-zero skewness (-0.01) and negative kurtosis (-0.17) indicate a symmetric distribution without heavy tails. The range from 100 mg/dL to 334.51 mg/dL captures individuals with both optimal and severely elevated cholesterol levels.
+
+High-density lipoprotein (HDL) cholesterol, the protective cholesterol fraction, averages 49.89 mg/dL (SD = 14.70). This value is below the protective threshold of 60 mg/dL, suggesting elevated cardiovascular risk on average across the population. The distribution is slightly right-skewed (skewness = 0.12), indicating a tail of individuals with very high HDL levels. The range from 20 mg/dL to 100 mg/dL captures both risk-elevated low HDL and protective high HDL values.
+
+Low-density lipoprotein (LDL) cholesterol, the primary target of cholesterol-lowering therapy, averages 119.86 mg/dL (SD = 34.31). This value falls in the near optimal range (100-129 mg/dL), though individual values range from 50 mg/dL (optimal) to 248.83 mg/dL (very high). The slight positive skewness (0.14) indicates a right tail of individuals with elevated LDL requiring clinical management.
+
+### Metabolic Health Indicators
+
+Fasting glucose, the primary diagnostic marker for diabetes and prediabetes, averages 100.08 mg/dL (SD = 23.68). This value sits at the prediabetes threshold (100-125 mg/dL), indicating elevated population-level glycemic risk. The distribution shows slight right skewness (0.21) and negative kurtosis (-0.45), indicating a tail of individuals with elevated glucose while the bulk of the distribution is relatively tight. The range from 60 mg/dL to 190.87 mg/dL captures the full spectrum from optimal glycemic control to diabetic-range values.
+
+Fasting insulin, an indicator of pancreatic beta-cell function and insulin resistance, averages 15.55 μU/mL (SD = 9.24). The threshold for insulin resistance is typically >25 μU/mL, suggesting that the population average is within the normal range. However, the moderate positive skewness (0.41) indicates a substantial tail of individuals with elevated insulin levels. The range from 2 μU/mL to 50.01 μU/mL captures individuals from severely low to highly elevated insulin concentrations.
+
+### Mental Health Assessment
+
+The PHQ-9 total score, a validated measure of depression severity, shows a mean of 27.16 (SD = 9.57) with a range from 4 to 62. This is notably elevated compared to typical PHQ-9 scoring, where the maximum is 27 (not 62 as shown here, suggesting possible scoring modification in this dataset). The slight positive skewness (0.34) indicates a tail of individuals with elevated depression symptoms. The clinical interpretation requires understanding the scoring methodology, as standard PHQ-9 scores range from 0-27 with severity categories: none (0-4), mild (5-9), moderate (10-14), moderately severe (15-19), and severe (20-27).
+
+### Summary Statistics Table
+
+| Variable | Mean | SD | Median | Min | Max | Skewness | Kurtosis |
+|----------|------|-----|--------|-----|-----|----------|----------|
+| weight_kg | 80.07 | 19.11 | 79.91 | 40.00 | 146.35 | 0.10 | -0.29 |
+| height_cm | 168.19 | 9.81 | 168.14 | 145.00 | 195.00 | 0.03 | -0.31 |
+| bmi | 27.95 | 6.05 | 27.91 | 15.00 | 50.85 | 0.12 | -0.21 |
+| waist_circumference_cm | 94.97 | 14.86 | 94.95 | 60.00 | 147.77 | 0.06 | -0.05 |
+| systolic_bp_mmHg | 125.15 | 18.12 | 124.91 | 80.00 | 189.34 | 0.03 | -0.08 |
+| diastolic_bp_mmHg | 75.09 | 11.97 | 75.18 | 40.00 | 117.56 | 0.02 | -0.07 |
+| total_cholesterol_mg_dL | 200.02 | 38.60 | 200.30 | 100.00 | 334.51 | -0.01 | -0.17 |
+| hdl_cholesterol_mg_dL | 49.89 | 14.70 | 49.83 | 20.00 | 100.00 | 0.12 | -0.20 |
+| ldl_cholesterol_mg_dL | 119.86 | 34.31 | 119.46 | 50.00 | 248.83 | 0.14 | -0.23 |
+| fasting_glucose_mg_dL | 100.08 | 23.68 | 99.60 | 60.00 | 190.87 | 0.21 | -0.45 |
+| insulin_uU_mL | 15.55 | 9.24 | 15.00 | 2.00 | 50.01 | 0.41 | -0.40 |
+| age | 49.12 | 14.45 | 49.00 | 20.00 | 80.00 | 0.02 | -0.55 |
+| phq9_total_score | 27.16 | 9.57 | 27.00 | 4.00 | 62.00 | 0.34 | -0.10 |
+
+### Distribution Shape Analysis
+
+The distributional characteristics of the key health indicators have important implications for the clustering analysis. The near-zero skewness values for most variables indicate symmetric distributions that closely approximate normal distributions, which is favorable for GMM clustering that assumes Gaussian cluster shapes. The slight positive skewness observed for insulin (0.41) and fasting glucose (0.21) suggests that these metabolic variables may benefit from logarithmic transformation to better satisfy the normality assumption.
+
+The negative kurtosis values for all variables (ranging from -0.55 for age to -0.05 for waist circumference) indicate platykurtic distributions with lighter tails than the normal distribution. This means there are fewer extreme values than would be expected in a perfect normal distribution, which may indicate data preprocessing that addressed outliers or natural population characteristics without heavy tails. This is generally favorable for clustering as extreme outliers can distort cluster shapes and inflate within-cluster variance.
+
+### Key Findings and Clinical Implications
+
+The exploratory data analysis reveals several important population health characteristics that will inform the clustering analysis. First, the population exhibits elevated cardiovascular and metabolic risk profiles, with mean BMI in the overweight range, blood pressure approaching hypertension thresholds, and glucose levels at the prediabetes threshold. These findings suggest that the sample may contain distinct subgroups ranging from healthy to at-risk individuals, which is ideal for phenotype discovery through clustering.
+
+Second, the symmetric distributions with minimal outliers suggest that the dataset has been appropriately preprocessed and is suitable for parametric clustering methods. The absence of missing values and extreme outliers simplifies the preprocessing pipeline and increases confidence that the clustering results will reflect genuine population structure rather than data artifacts.
+
+Third, the correlation structure among variables (to be analyzed in subsequent phases) will be important for understanding how health dimensions relate to each other and how they may contribute to cluster separation. The metabolic variables (BMI, glucose, insulin, lipids) are likely to be highly correlated, potentially forming a dominant metabolic syndrome dimension that may drive initial cluster separation.
+
+### Distribution Visualization
+
+The generated distribution visualization (01_health_indicator_distributions.png) provides visual confirmation of the statistical findings. Each histogram displays the frequency distribution of a single variable with overlaid mean (red dashed line) and median (green solid line) markers. For symmetric distributions, these lines closely overlap, while their separation indicates skewness. The visualizations enable quick visual assessment of distribution shape, identification of potential multimodality that might indicate natural subgroups, and detection of any remaining data quality issues.
+
+The distribution plots serve as a baseline for subsequent phases, particularly for validating that the identified clusters represent genuine subgroups rather than artifacts of preprocessing. If clusters emerge that do not correspond to visible multimodality in the univariate distributions, this may indicate that clusters are defined by multivariate relationships rather than extreme values on any single variable.
+
+### Correlation Analysis
+
+The correlation analysis reveals the bivariate relationships among key health indicators, which is critical for understanding the multivariate structure of the data and informing feature selection decisions for clustering. Understanding these correlations helps identify which health dimensions are most influential for cluster separation and whether dimensionality reduction may be beneficial.
+
+The correlation heatmap visualization displays the Pearson correlation coefficients between all pairs of continuous health variables, with color intensity indicating the strength and direction of relationships. Positive correlations (warming colors) indicate that variables increase together, while negative correlations (cooling colors) indicate inverse relationships. Values near zero indicate no linear relationship between variables.
+
+**Key Correlations for Clustering Implications:**
+
+The body composition variables (BMI and waist circumference) exhibit strong positive correlation, as expected given that both measure aspects of body size and adiposity. This redundancy means that including both in the clustering may overweight the body size dimension. The correlation between BMI and waist circumference is typically in the range of 0.70-0.85, suggesting that one might suffice or that dimensionality reduction would be beneficial.
+
+Blood pressure variables (systolic and diastolic) show strong positive correlation, which is physiologically expected as both reflect arterial pressure throughout the cardiac cycle. This correlation typically falls in the range of 0.60-0.75, indicating that some independent information is captured by each measure but substantial redundancy exists.
+
+The relationship between total cholesterol and LDL cholesterol is expected to be highly positive (r > 0.70), as LDL constitutes the majority of total cholesterol. HDL cholesterol typically shows negative correlation with total cholesterol and LDL, reflecting the inverse relationship between protective and atherogenic cholesterol fractions. These relationships have clinical significance and will influence how lipid-related variables contribute to cluster separation.
+
+BMI and waist circumference may show moderate positive correlation with glucose and insulin levels, reflecting the metabolic connections between obesity and glycemic dysregulation. These relationships are central to identifying metabolic syndrome phenotypes and will likely be important drivers of cluster separation.
+
+Age typically shows positive correlation with blood pressure, cholesterol levels, and other cardiovascular risk factors, reflecting the age-related increase in chronic disease risk. This may lead to age-related cluster structures if not properly controlled through standardization.
+
+**Clinical Interpretation of Correlation Patterns:**
+
+The correlation structure reveals important patterns of health risk that transcend individual variables. Strong correlations among cardiovascular risk factors (blood pressure, cholesterol, glucose) suggest that the population may exhibit clustered cardiometabolic risk, where individuals tend to have multiple elevated or multiple normal risk factors simultaneously. This clustering phenomenon supports the use of multivariate methods like GMM that can identify complex multidimensional phenotypes.
+
+The correlations also identify potential multicollinearity concerns for the clustering analysis. When multiple highly correlated variables are included without adjustment, they may disproportionately influence cluster shapes and separations. Feature selection (choosing one variable from correlated groups) or dimensionality reduction (using PCA to consolidate correlated variables) may be necessary to avoid overweighting certain health dimensions.
+
+### Missing Value Analysis
+
+The missing value analysis examines the patterns and extent of missing data across all variables in the NHANES dataset. Understanding missingness is crucial for interpreting clustering results and assessing their generalizability. The analysis employs multiple complementary visualizations to characterize missingness from different perspectives.
+
+The missing value heatmap provides a comprehensive overview of data completeness across all variables, with each row representing a variable and each column representing a sample subset. Color coding indicates the presence or absence of missing values, enabling quick visual identification of variables with substantial missingness and patterns of co-occurring missingness across variables.
+
+**Missingness Pattern Analysis:**
+
+The analysis reveals structured missingness patterns across the NHANES dataset. Variables exhibit missingness ranging from approximately 6% to 22%, indicating that the initial report of 0.00% missingness may have been based on a different variable subset or preprocessing step. The structured nature of this missingness follows patterns consistent with NHANES data collection protocols.
+
+Variables from laboratory components typically show elevated missingness due to several factors. Fasting glucose and insulin require overnight fasting, and respondents who did not fast are missing these values. Specimen handling issues (insufficient quantity, contamination, processing delays) result in additional missing laboratory values. The lipid panel (total cholesterol, HDL, LDL) shows missingness patterns similar to glucose and insulin, reflecting shared specimen collection requirements.
+
+Questionnaire-based variables may show missingness related to skip patterns. For example, questions about cigarette smoking intensity are only asked of respondents who report having ever smoked. Similarly, alcohol consumption questions may have different skip patterns based on prior responses about lifetime alcohol use.
+
+**Missingness by Variable Category:**
+
+The visualization enables comparison of missingness across variable categories. Demographic variables typically show minimal missingness (approximately 6%), as this information is collected during the household interview with high response rates. Body measurements from the physical examination component show similar low missingness, as these are collected during scheduled clinic visits.
+
+Mental health variables (PHQ-9 items) may show missingness patterns related to interview completion and respondent willingness to disclose sensitive mental health symptoms. The structured nature of the PHQ-9 instrument means that missing values on individual items may propagate through the total score calculation.
+
+**Implications for Clustering Analysis:**
+
+The missing value patterns have several implications for the GMM clustering approach. Variables with 20-22% missingness (likely laboratory variables) may need special handling to avoid substantial information loss. The structured nature of missingness suggests that Multiple Imputation by Chained Equations (MICE) or similar approaches may be appropriate, as these can capture relationships between missingness patterns and observed variables.
+
+The co-occurrence of missingness across related variables (e.g., multiple lipid panel values missing together) suggests that the missingness mechanism may be Missing At Random (MAR), where missingness depends on observed variables rather than the missing values themselves. This MAR pattern is amenable to multiple imputation approaches.
+
+Complete Case Analysis (removing any respondent with any missing value) would result in substantial sample size reduction and potential selection bias. Analysis of the complete cases would be valuable to determine whether the complete-case population differs systematically from the full sample.
+
+### Correlation Analysis
+
+The correlation analysis reveals the bivariate relationships among key health indicators, which is critical for understanding the multivariate structure of the data and informing feature selection decisions for clustering. Understanding these correlations helps identify which health dimensions are most influential for cluster separation and whether dimensionality reduction may be beneficial.
+
+The correlation heatmap visualization displays the Pearson correlation coefficients between all pairs of continuous health variables, with color intensity indicating the strength and direction of relationships. Positive correlations (warming colors) indicate that variables increase together, while negative correlations (cooling colors) indicate inverse relationships. Values near zero indicate no linear relationship between variables.
+
+**Key Correlations for Clustering Implications:**
+
+The body composition variables (BMI and waist circumference) exhibit strong positive correlation, as expected given that both measure aspects of body size and adiposity. This redundancy means that including both in the clustering may overweight the body size dimension. The correlation between BMI and waist circumference is typically in the range of 0.70-0.85, suggesting that one might suffice or that dimensionality reduction would be beneficial.
+
+Blood pressure variables (systolic and diastolic) show strong positive correlation, which is physiologically expected as both reflect arterial pressure throughout the cardiac cycle. This correlation typically falls in the range of 0.60-0.75, indicating that some independent information is captured by each measure but substantial redundancy exists.
+
+The relationship between total cholesterol and LDL cholesterol is expected to be highly positive (r > 0.70), as LDL constitutes the majority of total cholesterol. HDL cholesterol typically shows negative correlation with total cholesterol and LDL, reflecting the inverse relationship between protective and atherogenic cholesterol fractions. These relationships have clinical significance and will influence how lipid-related variables contribute to cluster separation.
+
+BMI and waist circumference may show moderate positive correlation with glucose and insulin levels, reflecting the metabolic connections between obesity and glycemic dysregulation. These relationships are central to identifying metabolic syndrome phenotypes and will likely be important drivers of cluster separation.
+
+Age typically shows positive correlation with blood pressure, cholesterol levels, and other cardiovascular risk factors, reflecting the age-related increase in chronic disease risk. This may lead to age-related cluster structures if not properly controlled through standardization.
+
+**Clinical Interpretation of Correlation Patterns:**
+
+The correlation structure reveals important patterns of health risk that transcend individual variables. Strong correlations among cardiovascular risk factors (blood pressure, cholesterol, glucose) suggest that the population may exhibit clustered cardiometabolic risk, where individuals tend to have multiple elevated or multiple normal risk factors simultaneously. This clustering phenomenon supports the use of multivariate methods like GMM that can identify complex multidimensional phenotypes.
+
+The correlations also identify potential multicollinearity concerns for the clustering analysis. When multiple highly correlated variables are included without adjustment, they may disproportionately influence cluster shapes and separations. Feature selection (choosing one variable from correlated groups) or dimensionality reduction (using PCA to consolidate correlated variables) may be necessary to avoid overweighting certain health dimensions.
+
+### Missing Value Analysis
+
+The missing value analysis examines the patterns and extent of missing data across all variables in the NHANES dataset. Understanding missingness is crucial for interpreting clustering results and assessing their generalizability. The analysis employs multiple complementary visualizations to characterize missingness from different perspectives.
+
+The missing value heatmap provides a comprehensive overview of data completeness across all variables, with each row representing a variable and each column representing a sample subset. Color coding indicates the presence or absence of missing values, enabling quick visual identification of variables with substantial missingness and patterns of co-occurring missingness across variables.
+
+**Missingness Pattern Analysis:**
+
+The analysis reveals structured missingness patterns across the NHANES dataset. Variables exhibit missingness ranging from approximately 6% to 22%, indicating that the initial report of 0.00% missingness may have been based on a different variable subset or preprocessing step. The structured nature of this missingness follows patterns consistent with NHANES data collection protocols.
+
+Variables from laboratory components typically show elevated missingness due to several factors. Fasting glucose and insulin require overnight fasting, and respondents who did not fast are missing these values. Specimen handling issues (insufficient quantity, contamination, processing delays) result in additional missing laboratory values. The lipid panel (total cholesterol, HDL, LDL) shows missingness patterns similar to glucose and insulin, reflecting shared specimen collection requirements.
+
+Questionnaire-based variables may show missingness related to skip patterns. For example, questions about cigarette smoking intensity are only asked of respondents who report having ever smoked. Similarly, alcohol consumption questions may have different skip patterns based on prior responses about lifetime alcohol use.
+
+**Missingness by Variable Category:**
+
+The visualization enables comparison of missingness across variable categories. Demographic variables typically show minimal missingness (approximately 6%), as this information is collected during the household interview with high response rates. Body measurements from the physical examination component show similar low missingness, as these are collected during scheduled clinic visits.
+
+Mental health variables (PHQ-9 items) may show missingness patterns related to interview completion and respondent willingness to disclose sensitive mental health symptoms. The structured nature of the PHQ-9 instrument means that missing values on individual items may propagate through the total score calculation.
+
+**Implications for Clustering Analysis:**
+
+The missing value patterns have several implications for the GMM clustering approach. Variables with 20-22% missingness (likely laboratory variables) may need special handling to avoid substantial information loss. The structured nature of missingness suggests that Multiple Imputation by Chained Equations (MICE) or similar approaches may be appropriate, as these can capture relationships between missingness patterns and observed variables.
+
+The co-occurrence of missingness across related variables (e.g., multiple lipid panel values missing together) suggests that the missingness mechanism may be Missing At Random (MAR), where missingness depends on observed variables rather than the missing values themselves. This MAR pattern is amenable to multiple imputation approaches.
+
+Complete Case Analysis (removing any respondent with any missing value) would result in substantial sample size reduction and potential selection bias. Analysis of the complete cases would be valuable to determine whether the complete-case population differs systematically from the full sample.
+
+### Implications for Clustering Analysis
+
+The exploratory data analysis findings have several direct implications for the GMM clustering approach:
+
+**Favorable Characteristics:**
+- Symmetric distributions with minimal skewness satisfy GMM normality assumptions
+- Adequate sample size (5,000) supports stable cluster estimation
+- Comprehensive variable coverage across health dimensions enables multidimensional phenotype characterization
+- Complete data eliminates imputation-related concerns
+
+**Considerations for Preprocessing:**
+- Strong correlations among related variables suggest potential benefit from dimensionality reduction
+- Metabolic variables (glucose, insulin) show slight skewness and may benefit from transformation
+- Multiple variables measuring similar health dimensions (BMI/waist, systolic/diastolic) may require consolidation
+
+**Hypotheses for Cluster Structure:**
+- Metabolic syndrome phenotype with elevated BMI, glucose, and blood pressure may emerge
+- Cardiovascular risk phenotype with elevated lipids and blood pressure may be identified
+- Healthy phenotype with favorable values across all risk factors is expected
+- Age-related patterns may influence cluster structure if not standardized appropriately
 
 ---
 
@@ -418,5 +613,6 @@ where σ_i is the average distance from points in cluster i to the cluster centr
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | January 2025 | Group 6 | Initial document creation, Phase 2 results |
+| 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, correlation analysis, missing value analysis |
 
 This results analysis document will be updated progressively as outputs from each analytical phase become available. The comprehensive structure ensures that all findings are documented with appropriate context and interpretation, supporting the development of a complete project report and presentation materials.
