@@ -1,0 +1,331 @@
+# =============================================================================
+# PHASE 20: FINAL SUMMARY AND EXPORT
+# =============================================================================
+
+print("=" * 70)
+print("FINAL SUMMARY AND EXPORT")
+print("=" * 70)
+
+# Complete summary statistics
+print("\n" + "-" * 70)
+print("COMPLETE PROJECT SUMMARY")
+print("-" * 70)
+
+print(f"\n[DATASET CHARACTERISTICS]")
+print(f"  Total Samples: {len(data):,}")
+print(f"  Features Used: {len(FEATURE_COLUMNS)}")
+
+print(f"\n[MODEL CONFIGURATION]")
+print(f"  Algorithm: Gaussian Mixture Models (GMM)")
+print(f"  Number of Components: {best_params['n_components']}")
+print(f"  Covariance Type: {best_params['covariance_type']}")
+print(f"  Number of Initializations: {best_params['n_init']}")
+
+print(f"\n[MODEL PERFORMANCE]")
+print(f"  BIC Score: {full_eval['bic']:.2f}")
+print(f"  AIC Score: {full_eval['aic']:.2f}")
+print(f"  Silhouette Score: {full_eval['silhouette']:.4f}")
+
+print(f"\n[CLUSTER SUMMARY]")
+n_clusters = best_params['n_components']
+for c in range(n_clusters):
+    cluster_subset = data[data['cluster'] == c]
+    print(f"  Cluster {c} ({len(cluster_subset):,} individuals, {100*len(cluster_subset)/len(data):.1f}%):")
+    print(f"    Mean Age: {cluster_subset['age'].mean():.1f} years")
+    print(f"    Mean BMI: {cluster_subset['bmi'].mean():.1f}")
+    print(f"    Mean Systolic BP: {cluster_subset['systolic_bp_mmHg'].mean():.1f} mmHg")
+
+print(f"\n[UNCERTAINTY ANALYSIS]")
+print(f"  High Confidence (>=0.8): {high_conf:,} ({100*high_conf/len(data):.1f}%)")
+print(f"  Moderate Confidence: {mod_conf:,} ({100*mod_conf/len(data):.1f}%)")
+print(f"  Low Confidence (<0.5): {low_conf:,} ({100*low_conf/len(data):.1f}%)")
+print(f"  Mean Assignment Entropy: {entropy.mean():.4f}")
+
+# Export all results
+print("\n[INFO] Exporting results...")
+
+# Save complete dataset with cluster assignments
+export_df = data.copy()
+export_df['max_probability'] = max_probs
+export_df['entropy'] = entropy
+export_df.to_csv(os.path.join(OUTPUT_DIR, 'predictions', 'complete_cluster_assignments.csv'), index=False)
+print("  [OK] Complete cluster assignments saved")
+
+# Save cluster profiles
+cluster_profiles_export = cluster_profiles.copy()
+cluster_profiles_export['n_individuals'] = cluster_sizes.values
+cluster_profiles_export['proportion'] = cluster_proportions.values
+cluster_profiles_export.to_csv(os.path.join(OUTPUT_DIR, 'cluster_profiles', 'detailed_cluster_profiles.csv'))
+print("  [OK] Detailed cluster profiles saved")
+
+# Save probability assignments
+prob_df = pd.DataFrame(membership_probs, columns=[f'Cluster_{i}_Prob' for i in range(n_clusters)])
+prob_df['Predicted_Cluster'] = data['cluster'].values
+prob_df['Max_Probability'] = max_probs
+prob_df['Entropy'] = entropy
+prob_df.to_csv(os.path.join(OUTPUT_DIR, 'predictions', 'cluster_probabilities.csv'), index=False)
+print("  [OK] Cluster probabilities saved")
+
+# Save model using the save_model function
+model_filepath = save_model(gmm_optimal, 'final_gmm_model', subdir='final')
+print(f"  [OK] Final model saved to: {model_filepath}")
+
+# =============================================================================
+# ADDITIONAL OUTPUT EXPORTS
+# =============================================================================
+
+# Create processed data directory and save
+os.makedirs(PHASE_DIRS['processed'], exist_ok=True)
+processed_data = data.copy()
+processed_data.to_csv(os.path.join(PHASE_DIRS['processed'], 'nhanes_clustered.csv'), index=False)
+print(f"\n  [OK] Processed data saved: data/processed/nhanes_clustered.csv")
+
+# Save validation metrics as JSON
+validation_results = {
+    'n_clusters': best_params['n_components'],
+    'silhouette_score': float(full_eval['silhouette']),
+    'calinski_harabasz_index': float(full_eval['calinski_harabasz']),
+    'davies_bouldin_index': float(full_eval['davies_bouldin']),
+    'bic_score': float(full_eval['bic']),
+    'aic_score': float(full_eval['aic']),
+    'high_confidence_assignments_pct': float(100 * high_conf / len(max_probs)),
+    'mean_entropy': float(entropy.mean())
+}
+os.makedirs(OUTPUT_SUBDIRS['validation'], exist_ok=True)
+with open(os.path.join(OUTPUT_SUBDIRS['validation'], 'validation_metrics.json'), 'w') as f:
+    json.dump(validation_results, f, indent=2)
+print(f"  [OK] Validation metrics saved: output_v2/validation/validation_metrics.json")
+
+# Save fairness analysis as JSON
+fairness_results = {}
+if 'sex' in data.columns:
+    for cluster in range(best_params['n_components']):
+        cluster_data = data[data['cluster'] == cluster]
+        sex_dist = cluster_data['sex'].value_counts(normalize=True)
+        fairness_results[f'cluster_{cluster}_sex_distribution'] = {k: float(v) for k, v in sex_dist.items()}
+
+if 'age_group' in data.columns:
+    for cluster in range(best_params['n_components']):
+        cluster_data = data[data['cluster'] == cluster]
+        age_dist = cluster_data['age_group'].value_counts(normalize=True)
+        fairness_results[f'cluster_{cluster}_age_distribution'] = {k: float(v) for k, v in age_dist.items()}
+
+os.makedirs(OUTPUT_SUBDIRS['fairness'], exist_ok=True)
+with open(os.path.join(OUTPUT_SUBDIRS['fairness'], 'fairness_analysis.json'), 'w') as f:
+    json.dump(fairness_results, f, indent=2)
+print(f"  [OK] Fairness analysis saved: output_v2/fairness/fairness_analysis.json")
+
+# Save cluster thresholds as JSON
+thresholds_data = {}
+for i in range(best_params['n_components']):
+    cluster_data = data[data['cluster'] == i]
+    thresholds_data[f'cluster_{i}'] = {
+        'n_samples': int(len(cluster_data)),
+        'bmi_mean': float(cluster_data['bmi'].mean()) if 'bmi' in cluster_data.columns else None,
+        'bmi_std': float(cluster_data['bmi'].std()) if 'bmi' in cluster_data.columns else None,
+        'glucose_mean': float(cluster_data['fasting_glucose_mg_dL'].mean()) if 'fasting_glucose_mg_dL' in cluster_data.columns else None,
+        'bp_mean': float(cluster_data['systolic_bp_mmHg'].mean()) if 'systolic_bp_mmHg' in cluster_data.columns else None,
+        'phq9_mean': float(cluster_data['phq9_total_score'].mean()) if 'phq9_total_score' in cluster_data.columns else None
+    }
+
+os.makedirs(OUTPUT_SUBDIRS['thresholds'], exist_ok=True)
+with open(os.path.join(OUTPUT_SUBDIRS['thresholds'], 'cluster_thresholds.json'), 'w') as f:
+    json.dump(thresholds_data, f, indent=2)
+print(f"  [OK] Cluster thresholds saved: output_v2/thresholds/cluster_thresholds.json")
+
+# Generate and save analysis report
+from datetime import datetime
+
+report = f"""GMM Health Phenotype Discovery - Analysis Report
+================================================
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+1. DATASET SUMMARY
+   - Total Samples: {data.shape[0]:,}
+   - Total Features: {data.shape[1]}
+   - Missing Values: {data.isnull().sum().sum()}
+
+2. MODEL CONFIGURATION
+   - Algorithm: Gaussian Mixture Models (GMM)
+   - Number of Clusters: {best_params['n_components']}
+   - Covariance Type: {best_params['covariance_type']}
+   - Regularization: {best_params['reg_covar']}
+
+3. MODEL PERFORMANCE
+   - BIC Score: {full_eval['bic']:.2f}
+   - AIC Score: {full_eval['aic']:.2f}
+   - Silhouette Score: {full_eval['silhouette']:.4f}
+   - Calinski-Harabasz Index: {full_eval['calinski_harabasz']:.2f}
+   - Davies-Bouldin Index: {full_eval['davies_bouldin']:.4f}
+
+4. CLUSTER DISTRIBUTION
+"""
+
+for cluster in range(best_params['n_components']):
+    count = cluster_sizes[cluster]
+    pct = cluster_proportions[cluster]
+    report += f"   - Cluster {cluster}: {count:,} samples ({pct}%)\n"
+
+report += f"""
+5. CLUSTER ASSIGNMENT CERTAINTY
+   - High Confidence (>=80%): {high_conf:,} ({100*high_conf/len(max_probs):.1f}%)
+   - Medium Confidence (50-80%): {med_conf:,} ({100*med_conf/len(max_probs):.1f}%)
+   - Low Confidence (<50%): {low_conf + very_low_conf:,} ({100*(low_conf+very_low_conf)/len(max_probs):.1f}%)
+
+6. KEY FINDINGS
+   - Identified {best_params['n_components']} distinct health phenotypes
+   - {100*high_conf/len(max_probs):.1f}% of assignments have high confidence
+   - Cluster quality metrics indicate {'good' if full_eval['silhouette'] > 0.5 else 'moderate'} separation
+
+7. OUTPUT FILES
+   - Figures: figures/plots/*.png
+   - Cluster Profiles: output_v2/cluster_profiles/
+   - Predictions: output_v2/predictions/
+   - Metrics: output_v2/metrics/
+   - Validation: output_v2/validation/
+   - Fairness: output_v2/fairness/
+   - Thresholds: output_v2/thresholds/
+   - Processed Data: data/processed/
+"""
+
+os.makedirs(PHASE_DIRS['reports'], exist_ok=True)
+with open(os.path.join(PHASE_DIRS['reports'], 'analysis_report.txt'), 'w') as f:
+    f.write(report)
+
+print(f"  [OK] Analysis report saved: output_v2/reports/analysis_report.txt")
+
+# Save execution log
+log_content = f"""GMM Health Phenotype Discovery - Execution Log
+================================================
+Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Execution Summary:
+- Data loaded: {data.shape[0]:,} samples
+- Features used: {len(FEATURE_COLUMNS)}
+- Clusters found: {best_params['n_components']}
+- Model converged: {gmm_optimal.converged_}
+- Total iterations: {gmm_optimal.n_iter_}
+
+Output Directory Structure:
+- data/processed/: Processed data with cluster assignments
+- output_v2/cluster_profiles/: Cluster profile statistics
+- output_v2/predictions/: Individual cluster predictions
+- output_v2/metrics/: Model selection and quality metrics
+- output_v2/validation/: Validation metrics
+- output_v2/fairness/: Fairness analysis
+- output_v2/thresholds/: Cluster thresholds
+- output_v2/reports/: Analysis reports
+- figures/plots/: Visualization figures
+"""
+
+os.makedirs(PHASE_DIRS['reports'], exist_ok=True)
+with open(os.path.join(PHASE_DIRS['reports'], 'analysis_report.txt'), 'w') as f:
+    f.write(report)
+
+print(f"  [OK] Execution log saved: output_v2/logs/execution_log.txt")
+
+# =============================================================================
+# FINAL SUMMARY VISUALIZATION
+# =============================================================================
+
+print("\n[INFO] Generating final summary visualization...")
+
+fig = plt.figure(figsize=(16, 12))
+fig.suptitle('GMM Health Phenotype Discovery - Final Summary', fontsize=18, fontweight='bold', y=0.98)
+
+# Subplot 1: Cluster Size Distribution
+ax1 = fig.add_subplot(2, 2, 1)
+colors = plt.cm.Set2(np.linspace(0, 1, best_params['n_components']))
+bars = ax1.bar(range(best_params['n_components']), cluster_sizes.values, color=colors, edgecolor='black')
+ax1.set_xlabel('Cluster', fontsize=12)
+ax1.set_ylabel('Number of Samples', fontsize=12)
+ax1.set_title('Cluster Size Distribution', fontsize=14, fontweight='bold')
+ax1.set_xticks(range(best_params['n_components']))
+for bar, size in zip(bars, cluster_sizes.values):
+    ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 50,
+             f'{size:,}\n({100*size/len(data):.1f}%)', ha='center', va='bottom', fontsize=10)
+ax1.grid(True, alpha=0.3, axis='y')
+
+# Subplot 2: Model Performance Metrics
+ax2 = fig.add_subplot(2, 2, 2)
+metrics_names = ['BIC\n(lower=better)', 'AIC\n(lower=better)', 'Silhouette\n(higher=better)',
+                 'Calinski-Harabasz\n(higher=better)', 'Davies-Bouldin\n(lower=better)']
+metrics_values = [full_eval['bic'], full_eval['aic'], full_eval['silhouette'] * 100,
+                  full_eval['calinski_harabasz'], full_eval['davies_bouldin'] * 10]
+metrics_colors = ['#e74c3c', '#e67e22', '#2ecc71', '#3498db', '#9b59b6']
+bars2 = ax2.bar(metrics_names, metrics_values, color=metrics_colors, edgecolor='black')
+ax2.set_ylabel('Score (normalized)', fontsize=12)
+ax2.set_title('Model Performance Metrics', fontsize=14, fontweight='bold')
+ax2.grid(True, alpha=0.3, axis='y')
+for bar, val in zip(bars2, [f'{full_eval["bic"]:.0f}', f'{full_eval["aic"]:.0f}',
+                            f'{full_eval["silhouette"]:.3f}', f'{full_eval["calinski_harabasz"]:.1f}',
+                            f'{full_eval["davies_bouldin"]:.3f}']):
+    ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 2,
+             val, ha='center', va='bottom', fontsize=9, fontweight='bold')
+
+# Subplot 3: Uncertainty Analysis - Confidence Levels
+ax3 = fig.add_subplot(2, 2, 3)
+confidence_levels = ['High\n(>=80%)', 'Moderate\n(50-80%)', 'Low\n(<50%)']
+confidence_counts = [high_conf, mod_conf, low_conf + very_low_conf]
+conf_colors = ['#2ecc71', '#f39c12', '#e74c3c']
+wedges, texts, autotexts = ax3.pie(confidence_counts, labels=confidence_levels, autopct='%1.1f%%',
+                                   colors=conf_colors, explode=[0.05, 0.02, 0.02],
+                                   shadow=True, startangle=90)
+ax3.set_title('Cluster Assignment Confidence', fontsize=14, fontweight='bold')
+for autotext in autotexts:
+    autotext.set_fontsize(10)
+    autotext.set_fontweight('bold')
+
+# Subplot 4: Key Findings Summary
+ax4 = fig.add_subplot(2, 2, 4)
+ax4.axis('off')
+
+# Create summary text box
+summary_text = f"""
+    KEY FINDINGS SUMMARY
+    ====================
+
+    Dataset: {len(data):,} samples, {len(FEATURE_COLUMNS)} features
+
+    Model: GMM with {best_params['n_components']} clusters
+    Covariance: {best_params['covariance_type']}
+
+    Best Model Score:
+    • BIC: {full_eval['bic']:.2f}
+    • AIC: {full_eval['aic']:.2f}
+    • Silhouette: {full_eval['silhouette']:.4f}
+
+    Cluster Quality:
+    • High confidence: {100*high_conf/len(data):.1f}%
+    • Mean entropy: {entropy.mean():.4f}
+
+    Output Files Generated: 12+
+    """
+
+ax4.text(0.1, 0.95, summary_text, transform=ax4.transAxes, fontsize=11,
+         verticalalignment='top', fontfamily='monospace',
+         bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.3))
+
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+plt.savefig(os.path.join(FIGURES_DIR, 'plots', '14_final_summary.png'), dpi=150, bbox_inches='tight')
+plt.show()
+
+print(f"\n[OK] Final summary visualization saved: {os.path.join(FIGURES_DIR, 'plots', '14_final_summary.png')}")
+
+print("\n" + "=" * 70)
+print("ANALYSIS COMPLETE - ALL OUTPUTS GENERATED")
+print("=" * 70)
+print(f"\nAll results saved to: {OUTPUT_DIR}")
+print(f"Figures saved to: {os.path.join(FIGURES_DIR, 'plots')}")
+print(f"Models saved to: {MODELS_DIR}")
+print(f"\nOutput directories populated:")
+print(f"  - data/processed/")
+print(f"  - output_v2/cluster_profiles/")
+print(f"  - output_v2/predictions/")
+print(f"  - output_v2/metrics/")
+print(f"  - output_v2/validation/")
+print(f"  - output_v2/fairness/")
+print(f"  - output_v2/thresholds/")
+print(f"  - output_v2/reports/")
+print(f"  - output_v2/logs/")
+print("=" * 70)
