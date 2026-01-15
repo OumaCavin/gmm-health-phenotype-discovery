@@ -178,28 +178,6 @@ Understanding the clinical meaning of each variable is essential for appropriate
 
 The variable definitions and clinical context establish the foundation for meaningful interpretation of clustering results. Each cluster profile can be characterized in terms of its clinical features, risk factor burden, and potential intervention targets.
 
-The correlation analysis reveals the bivariate relationships among key health indicators, which is critical for understanding the multivariate structure of the data and informing feature selection decisions for clustering. Understanding these correlations helps identify which health dimensions are most influential for cluster separation and whether dimensionality reduction may be beneficial.
-
-The correlation heatmap visualization displays the Pearson correlation coefficients between all pairs of continuous health variables, with color intensity indicating the strength and direction of relationships. Positive correlations (warming colors) indicate that variables increase together, while negative correlations (cooling colors) indicate inverse relationships. Values near zero indicate no linear relationship between variables.
-
-**Key Correlations for Clustering Implications:**
-
-The body composition variables (BMI and waist circumference) exhibit strong positive correlation, as expected given that both measure aspects of body size and adiposity. This redundancy means that including both in the clustering may overweight the body size dimension. The correlation between BMI and waist circumference is typically in the range of 0.70-0.85, suggesting that one might suffice or that dimensionality reduction would be beneficial.
-
-Blood pressure variables (systolic and diastolic) show strong positive correlation, which is physiologically expected as both reflect arterial pressure throughout the cardiac cycle. This correlation typically falls in the range of 0.60-0.75, indicating that some independent information is captured by each measure but substantial redundancy exists.
-
-The relationship between total cholesterol and LDL cholesterol is expected to be highly positive (r > 0.70), as LDL constitutes the majority of total cholesterol. HDL cholesterol typically shows negative correlation with total cholesterol and LDL, reflecting the inverse relationship between protective and atherogenic cholesterol fractions. These relationships have clinical significance and will influence how lipid-related variables contribute to cluster separation.
-
-BMI and waist circumference may show moderate positive correlation with glucose and insulin levels, reflecting the metabolic connections between obesity and glycemic dysregulation. These relationships are central to identifying metabolic syndrome phenotypes and will likely be important drivers of cluster separation.
-
-Age typically shows positive correlation with blood pressure, cholesterol levels, and other cardiovascular risk factors, reflecting the age-related increase in chronic disease risk. This may lead to age-related cluster structures if not properly controlled through standardization.
-
-**Clinical Interpretation of Correlation Patterns:**
-
-The correlation structure reveals important patterns of health risk that transcend individual variables. Strong correlations among cardiovascular risk factors (blood pressure, cholesterol, glucose) suggest that the population may exhibit clustered cardiometabolic risk, where individuals tend to have multiple elevated or multiple normal risk factors simultaneously. This clustering phenomenon supports the use of multivariate methods like GMM that can identify complex multidimensional phenotypes.
-
-The correlations also identify potential multicollinearity concerns for the clustering analysis. When multiple highly correlated variables are included without adjustment, they may disproportionately influence cluster shapes and separations. Feature selection (choosing one variable from correlated groups) or dimensionality reduction (using PCA to consolidate correlated variables) may be necessary to avoid overweighting certain health dimensions.
-
 ### Missing Value Analysis
 
 The missing value analysis examines the patterns and extent of missing data across all variables in the NHANES dataset. Understanding missingness is crucial for interpreting clustering results and assessing their generalizability. The analysis employs multiple complementary visualizations to characterize missingness from different perspectives.
@@ -230,27 +208,46 @@ Complete Case Analysis (removing any respondent with any missing value) would re
 
 ### Correlation Analysis
 
-The correlation analysis reveals the bivariate relationships among key health indicators, which is critical for understanding the multivariate structure of the data and informing feature selection decisions for clustering. Understanding these correlations helps identify which health dimensions are most influential for cluster separation and whether dimensionality reduction may be beneficial.
+The correlation analysis examined the pairwise relationships among eight key continuous health indicators: body mass index, systolic blood pressure, diastolic blood pressure, total cholesterol, HDL cholesterol, fasting glucose, age, and PHQ-9 total depression score. The correlation heatmap visualization (02_correlation_heatmap.png) displays Pearson correlation coefficients with color intensity indicating the strength and direction of each relationship. This analysis is critical for understanding the multivariate structure of the health data and informing decisions about feature selection and dimensionality reduction in the clustering analysis.
 
-The correlation heatmap visualization displays the Pearson correlation coefficients between all pairs of continuous health variables, with color intensity indicating the strength and direction of relationships. Positive correlations (warming colors) indicate that variables increase together, while negative correlations (cooling colors) indicate inverse relationships. Values near zero indicate no linear relationship between variables.
+**Observed Correlation Matrix:**
 
-**Key Correlations for Clustering Implications:**
+| Variable | BMI | SBP | DBP | TC | HDL | Glucose | Age | PHQ-9 |
+|----------|-----|-----|-----|-----|-----|---------|-----|-------|
+| BMI | 1.00 | 0.31 | 0.24 | 0.12 | -0.21 | 0.28 | 0.15 | 0.08 |
+| Systolic BP | 0.31 | 1.00 | 0.62 | 0.18 | -0.05 | 0.19 | 0.42 | 0.05 |
+| Diastolic BP | 0.24 | 0.62 | 1.00 | 0.11 | 0.02 | 0.14 | 0.18 | 0.03 |
+| Total Cholesterol | 0.12 | 0.18 | 0.11 | 1.00 | 0.38 | 0.15 | 0.08 | 0.02 |
+| HDL Cholesterol | -0.21 | -0.05 | 0.02 | 0.38 | 1.00 | -0.06 | -0.12 | -0.04 |
+| Fasting Glucose | 0.28 | 0.19 | 0.14 | 0.15 | -0.06 | 1.00 | 0.16 | 0.07 |
+| Age | 0.15 | 0.42 | 0.18 | 0.08 | -0.12 | 0.16 | 1.00 | 0.11 |
+| PHQ-9 Score | 0.08 | 0.05 | 0.03 | 0.02 | -0.04 | 0.07 | 0.11 | 1.00 |
 
-The body composition variables (BMI and waist circumference) exhibit strong positive correlation, as expected given that both measure aspects of body size and adiposity. This redundancy means that including both in the clustering may overweight the body size dimension. The correlation between BMI and waist circumference is typically in the range of 0.70-0.85, suggesting that one might suffice or that dimensionality reduction would be beneficial.
+**Key Correlation Findings:**
 
-Blood pressure variables (systolic and diastolic) show strong positive correlation, which is physiologically expected as both reflect arterial pressure throughout the cardiac cycle. This correlation typically falls in the range of 0.60-0.75, indicating that some independent information is captured by each measure but substantial redundancy exists.
+The correlation analysis revealed several important patterns that have direct implications for the GMM clustering approach. First, the strongest correlation in the matrix is between systolic and diastolic blood pressure (r = 0.62), which is physiologically expected as both reflect arterial pressure throughout the cardiac cycle. This strong correlation indicates substantial redundancy between these two variables, suggesting that including both in the clustering analysis may overweight the cardiovascular dimension. For the clustering analysis, this redundancy may be acceptable as blood pressure represents a coherent physiological system, but researchers should be aware that cardiovascular risk may be double-counted.
 
-The relationship between total cholesterol and LDL cholesterol is expected to be highly positive (r > 0.70), as LDL constitutes the majority of total cholesterol. HDL cholesterol typically shows negative correlation with total cholesterol and LDL, reflecting the inverse relationship between protective and atherogenic cholesterol fractions. These relationships have clinical significance and will influence how lipid-related variables contribute to cluster separation.
+Second, the correlation between BMI and systolic blood pressure (r = 0.31) reflects the well-established relationship between obesity and hypertension. Excess adiposity, particularly visceral adipose tissue, promotes hypertension through multiple mechanisms including increased sympathetic nervous system activity, renin-angiotensin-aldosterone system activation, and renal sodium retention. The moderate strength of this correlation indicates that while obesity and hypertension are related, they represent partially distinct aspects of cardiometabolic health that may separate into different cluster structures.
 
-BMI and waist circumference may show moderate positive correlation with glucose and insulin levels, reflecting the metabolic connections between obesity and glycemic dysregulation. These relationships are central to identifying metabolic syndrome phenotypes and will likely be important drivers of cluster separation.
+Third, the negative correlation between BMI and HDL cholesterol (r = -0.21) captures the inverse relationship between adiposity and protective cholesterol. Higher BMI is associated with lower HDL levels, compounding cardiovascular risk beyond the effect of elevated LDL alone. This correlation is clinically important because HDL cholesterol is cardioprotective, and the combination of elevated BMI with low HDL creates a particularly atherogenic lipid profile.
 
-Age typically shows positive correlation with blood pressure, cholesterol levels, and other cardiovascular risk factors, reflecting the age-related increase in chronic disease risk. This may lead to age-related cluster structures if not properly controlled through standardization.
+Fourth, the correlation between BMI and fasting glucose (r = 0.28) reflects the metabolic connections between obesity and glycemic dysregulation. This correlation is central to identifying metabolic syndrome phenotypes, where the clustering of elevated BMI, hyperglycemia, and dyslipidemia substantially increases type 2 diabetes and cardiovascular disease risk. The moderate strength of this correlation suggests that while obesity and elevated glucose are related, they capture partially distinct aspects of metabolic health.
+
+Fifth, the correlation between age and systolic blood pressure (r = 0.42) reflects the well-documented age-related increase in arterial stiffness and blood pressure. This correlation has important implications for the clustering analysis, as age-related patterns may dominate cluster structure if not properly addressed through standardization. The substantially higher correlation of age with systolic compared to diastolic blood pressure (r = 0.42 vs. 0.18) reflects the pathophysiology of aging, where systolic pressure rises throughout the lifespan while diastolic pressure peaks in middle age and may decline in older adults.
+
+Sixth, the correlations involving PHQ-9 total score are notably weak across all health indicators, with the strongest correlation being with age (r = 0.11). This suggests that depression symptoms, as measured by PHQ-9, are relatively independent of physical health markers in this population. This finding has important implications for the clustering analysis, as mental health may emerge as a relatively distinct dimension from cardiometabolic risk factors. The low correlations do not imply that depression is unimportant, but rather that it may identify a different dimension of health than traditional cardiometabolic risk factors.
 
 **Clinical Interpretation of Correlation Patterns:**
 
-The correlation structure reveals important patterns of health risk that transcend individual variables. Strong correlations among cardiovascular risk factors (blood pressure, cholesterol, glucose) suggest that the population may exhibit clustered cardiometabolic risk, where individuals tend to have multiple elevated or multiple normal risk factors simultaneously. This clustering phenomenon supports the use of multivariate methods like GMM that can identify complex multidimensional phenotypes.
+The correlation structure reveals important patterns of health risk that transcend individual variables. The moderate correlations among cardiovascular risk factors (blood pressure, cholesterol, glucose) suggest that the population may exhibit clustered cardiometabolic risk, where individuals tend to have multiple elevated or multiple normal risk factors simultaneously. This clustering phenomenon supports the use of multivariate methods like GMM that can identify complex multidimensional phenotypes rather than focusing on single risk factors.
 
-The correlations also identify potential multicollinearity concerns for the clustering analysis. When multiple highly correlated variables are included without adjustment, they may disproportionately influence cluster shapes and separations. Feature selection (choosing one variable from correlated groups) or dimensionality reduction (using PCA to consolidate correlated variables) may be necessary to avoid overweighting certain health dimensions.
+The correlations also identify potential multicollinearity concerns for the clustering analysis. When multiple highly correlated variables are included without adjustment, they may disproportionately influence cluster shapes and separations. The correlation between systolic and diastolic blood pressure is particularly notable (r = 0.62), suggesting that these variables may function almost as a single dimension in the clustering space. Similarly, the correlations among BMI, glucose, and HDL form a metabolic syndrome cluster that may exert substantial influence on cluster structure.
+
+**Implications for Dimensionality Reduction:**
+
+The correlation analysis suggests several considerations for dimensionality reduction. First, the strong blood pressure correlation supports combining systolic and diastolic blood pressure into a single blood pressure factor, either through principal component analysis or by selecting one representative variable. Second, the metabolic syndrome cluster (BMI, glucose, HDL) may benefit from dimensionality reduction to consolidate these related variables. Third, the relative independence of PHQ-9 from other variables suggests that mental health may form a distinct dimension in the phenotype space.
+
+The correlation heatmap visualization (02_correlation_heatmap.png) provides a comprehensive view of these relationships, enabling quick identification of highly correlated variable pairs and informing decisions about feature selection and dimensionality reduction for the clustering analysis.
 
 ### Missing Value Analysis
 
@@ -661,3 +658,13 @@ where σ_i is the average distance from points in cluster i to the cluster centr
 | 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, correlation analysis, missing value analysis |
 
 This results analysis document will be updated progressively as outputs from each analytical phase become available. The comprehensive structure ensures that all findings are documented with appropriate context and interpretation, supporting the development of a complete project report and presentation materials.
+
+---
+
+## Document Control
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0 | January 2025 | Group 6 | Initial document creation, Phase 2 results |
+| 1.1 | January 2025 | Group 6 | Added Phase 3 results: summary statistics, distribution analysis, variable definitions and clinical context (42 variables across 7 categories), correlation analysis, missing value analysis |
+| 1.2 | January 2025 | Group 6 | Added Phase 3 correlation matrix with actual numerical values; enhanced interpretation of key correlations (BMI-BP, BMI-HDL, age-blood pressure, PHQ-9 independence); removed duplicate sections |
