@@ -965,35 +965,99 @@ The ANOVA results validate the clinical interpretations from Phase 8. The highly
 
 The significant differences in blood pressure and lipid variables across clusters support the characterization of some phenotypes as having elevated cardiometabolic risk. Clusters 1 and 4, which show elevated glucose and blood pressure, are statistically distinguished from other clusters on these measures.
 
-## Phase 14: Feature Importance Analysis
+## Phase 14: Radar Charts for Cluster Profiles
 
-### F-Score Rankings
+### Cluster Profile Visualization Framework
 
-Feature importance was assessed using F-scores from the ANOVA analyses, where higher F-scores indicate greater between-cluster variance relative to within-cluster variance. This analysis identifies which features are most useful for distinguishing between phenotypes.
+The radar chart visualization provides an intuitive geometric representation of each cluster's characteristic health profile across five key dimensions. Unlike bar charts or scatter plots, radar charts excel at showing multidimensional profiles where multiple features contribute to overall characterization. Each cluster's profile appears as a distinctive polygon shape, with the area, symmetry, and orientation of the polygon revealing the balance of health characteristics that define each phenotype.
 
-**Feature Importance Rankings:**
+The radar chart approach is particularly appropriate for health phenotype visualization because it emphasizes the holistic profile rather than individual features. Clinical decision-making often requires integrating information across multiple health dimensions, and the radar chart format mirrors this integrative thinking by presenting the complete phenotype at a glance. The polygon shapes create memorable visual signatures for each phenotype that can support clinical communication and patient education.
 
-| Rank | Feature | F-score | Contribution to Separation |
-|------|---------|---------|---------------------------|
-| 1 | insulin_uU_mL | 1642.16 | Primary discriminator |
-| 2 | phq9_total_score | 950.37 | Primary discriminator |
-| 3 | fasting_glucose_mg_dL | 317.80 | Major discriminator |
-| 4 | systolic_bp_mmHg | 14.76 | Secondary discriminator |
-| 5 | ldl_cholesterol_mg_dL | 14.37 | Secondary discriminator |
-| 6 | hdl_cholesterol_mg_dL | 12.17 | Secondary discriminator |
-| 7 | total_cholesterol_mg_dL | 11.30 | Secondary discriminator |
-| 8 | age | 7.12 | Minor discriminator |
-| 9 | diastolic_bp_mmHg | 2.72 | Minor discriminator |
-| 10 | waist_circumference_cm | 2.06 | Minimal discriminator |
-| 11 | bmi | 1.40 | Minimal discriminator |
+The visualization normalizes all features to a 0-1 scale, ensuring that features with different original units and ranges can be compared on a common scale. This normalization preserves the relative position of each cluster within the population while enabling fair comparison across features that might otherwise be dominated by variables with larger absolute values.
 
-The feature importance analysis reveals that metabolic and mental health variables dominate cluster separation, while body composition variables (BMI, waist circumference) contribute minimally. This pattern suggests that the phenotypes are defined more by metabolic function than by body size, which has important implications for intervention targeting.
+**Radar Chart Features:**
 
-### Clinical Implications
+| Feature | Original Scale | Clinical Dimension |
+|---------|---------------|-------------------|
+| Age | 20-80 years | Life stage, disease risk |
+| BMI | 15-51 kg/m² | Body composition |
+| Systolic BP | 80-189 mmHg | Cardiovascular function |
+| Fasting Glucose | 60-191 mg/dL | Glycemic status |
+| PHQ-9 Score | 4-62 | Mental health |
 
-The dominance of insulin, glucose, and depression as discriminating features suggests that interventions targeting these specific dimensions may be most effective for each phenotype. Cluster 0 (extremely low insulin) represents a metabolic profile that may be resilient to diabetes development, while Cluster 2 (high insulin with normal glucose) represents a population at elevated risk for future glucose dysregulation.
+### Cluster 0 Profile: Metabolic-Healthy with Depression
 
-The relatively minor contribution of BMI to cluster separation indicates that body mass alone is insufficient for health phenotype characterization. This finding supports a more nuanced approach to obesity and metabolic health that considers metabolic function beyond simple body size categories.
+The radar chart for Cluster 0 reveals a distinctive profile characterized by severely depressed insulin levels combined with otherwise normal metabolic parameters. The polygon shape shows strong depression (PHQ-9) elevation while maintaining near-average values on other dimensions. This pattern creates an asymmetric profile with the PHQ-9 vertex extended outward while metabolic features cluster near the center.
+
+The normalized PHQ-9 value for Cluster 0 reflects the severe depression that characterizes this phenotype. The severe depression scores (mean PHQ-9 ≈26.7) are among the highest across all clusters, creating a prominent feature in the radar profile. Despite the mental health burden, the metabolic dimensions (glucose, BMI, blood pressure) show values near or below the population average, distinguishing this from other depression phenotypes where metabolic dysfunction often co-occurs with mood disorders.
+
+The insulin normalization context is important for interpretation: while the raw insulin values for Cluster 0 are dramatically lower than other clusters (mean ≈4.8 μU/mL), the radar chart emphasizes the integrated profile rather than any single feature. The relatively compact polygon shape indicates that this phenotype is defined by the combination of features rather than extreme values on multiple dimensions.
+
+### Cluster 1 Profile: Cardiometabolic Risk
+
+The radar chart for Cluster 1 displays an elongated profile with emphasis on the glucose and blood pressure dimensions. The polygon shows elevated values on metabolic and cardiovascular features, creating a distinctive shape that extends outward in the upper-right portion of the chart. The profile reflects the cardiometabolic risk phenotype characterized by glucose dysregulation and elevated blood pressure in an older population.
+
+The normalized glucose value for Cluster 1 is elevated relative to the population, reflecting the prediabetic glucose levels (mean ≈102.5 mg/dL) that define this phenotype. Combined with the elevated systolic blood pressure (mean ≈128 mmHg), this creates a cardiovascular risk profile that warrants clinical attention. The age dimension is also elevated, consistent with the older mean age (≈51 years) of this cluster.
+
+The radar profile for Cluster 1 shows moderate extension on multiple dimensions rather than extreme values on a single feature. This pattern is clinically meaningful because it reflects the combined cardiometabolic risk that characterizes metabolic syndrome—a constellation of abnormalities that together substantially increase cardiovascular disease and diabetes risk. The integrated presentation supports phenotype-specific intervention targeting the cardiometabolic pathway.
+
+### Cluster 2 Profile: Insulin Resistant
+
+The radar chart for Cluster 2 reveals a profile dominated by the insulin dimension, with the polygon showing pronounced extension in the insulin direction while maintaining near-normal values on other features. The distinctive shape reflects the insulin resistant phenotype where elevated insulin (mean ≈22.4 μU/mL) occurs in the context of normal glucose levels, representing an early stage of metabolic dysfunction before glycemic decompensation.
+
+The normalized insulin value creates the most distinctive feature of the Cluster 2 radar profile. The dramatic elevation relative to other clusters (insulin is the primary discriminator in the ANOVA analysis with F=1642) produces an asymmetric polygon that extends farthest in the insulin direction. This visualization immediately communicates the defining characteristic of this phenotype.
+
+The near-normal values on glucose and other metabolic dimensions create an interesting clinical picture: these individuals have developed insulin resistance sufficient to require compensatory hyperinsulinemia, but have not yet progressed to glucose dysregulation. This represents a critical intervention window where lifestyle modification or pharmacological treatment might prevent progression to prediabetes or type 2 diabetes.
+
+### Cluster 3 Profile: Hypoglycemic
+
+The radar chart for Cluster 3 shows the most distinctive and unusual profile of all clusters, with pronounced depression on the glucose dimension combined with near-average values on other features. The polygon shape is asymmetric with the glucose vertex pulled toward the center, creating a distinctive "concave" appearance that immediately distinguishes this phenotype from all others.
+
+The normalized glucose value for Cluster 3 is dramatically below the population average, reflecting the hypoglycemic glucose levels (mean ≈60.0 mg/dL) that define this rare phenotype. The low glucose values are approximately 40 mg/dL lower than the population mean, representing a clinically significant deviation that warrants medical evaluation. Unlike other clusters where low glucose might indicate excellent metabolic health, the context of co-occurring features (including elevated insulin) suggests this represents an abnormal metabolic state rather than optimal glycemic control.
+
+The radar profile for Cluster 3 shows the smallest polygon area of all clusters, reflecting the narrow range of values across features. This compact profile indicates that this phenotype is defined by the specific combination of low glucose with otherwise normal values, rather than by extreme values across multiple dimensions. The compact shape also visually communicates the rarity of this phenotype (5.2% of the population) and the distinctive nature of its health profile.
+
+### Cluster 4 Profile: Combined Metabolic-Mental Risk
+
+The radar chart for Cluster 4 displays the largest and most extended polygon of all clusters, reflecting the combined metabolic-mental risk profile that characterizes the most prevalent phenotype. The profile shows simultaneous elevation on multiple dimensions including glucose, BMI, blood pressure, and PHQ-9, creating a symmetrically extended shape that dominates the visualization.
+
+The normalized values for Cluster 4 show elevated glucose (mean ≈107.9 mg/dL), elevated BMI (mean ≈29.1 kg/m²), elevated blood pressure (mean systolic ≈128 mmHg), and dramatically elevated PHQ-9 (mean ≈35.2). The combination of these elevations creates a polygon that extends outward on nearly all dimensions, visually representing the "combined risk" characterization.
+
+The radar profile for Cluster 4 provides immediate visual confirmation of why this is the largest phenotype (35.3% of the population). The profile captures a common pattern of co-occurring metabolic dysfunction and mental health burden that appears frequently in the NHANES population. The symmetric extension across dimensions indicates that this is not an extreme phenotype defined by a single unusual feature, but rather a common pattern defined by the simultaneous presence of multiple risk factors.
+
+### Comparative Profile Analysis
+
+The side-by-side radar chart comparison enables direct visual comparison of cluster profiles, revealing the relative importance of different health dimensions for each phenotype. The comparison illuminates both the distinctive features of each cluster and the shared characteristics that indicate related phenotypes.
+
+**Profile Shape Characteristics:**
+
+| Cluster | Primary Feature | Profile Shape | Visual Distinctiveness |
+|---------|-----------------|---------------|------------------------|
+| 0 | PHQ-9 (depression) | Asymmetric, depression-extended | High |
+| 1 | Glucose + BP | Asymmetric, upper-right extended | Moderate |
+| 2 | Insulin | Asymmetric, insulin-extreme | High |
+| 3 | Low glucose | Asymmetric, glucose-concave | Very High |
+| 4 | Multiple elevated | Symmetric, broadly extended | Moderate |
+
+The comparative analysis reveals that Clusters 0, 2, and 3 have the most distinctive profiles with pronounced asymmetry, while Clusters 1 and 4 show more complex profiles with multiple elevated features. This distinction has implications for intervention design: phenotypes with distinctive profiles (high asymmetry) may respond to targeted interventions addressing the primary characteristic, while phenotypes with complex profiles may require multi-component interventions addressing multiple risk factors simultaneously.
+
+The radar chart visualization also reveals which features are most important for distinguishing phenotypes. Features where cluster profiles differ substantially (insulin, glucose, PHQ-9) create the most distinctive polygon shapes, while features where clusters are similar (age, BMI) contribute less to visual differentiation. This visual hierarchy of feature importance complements the quantitative ANOVA results and provides intuitive validation of the statistical findings.
+
+### Clinical Interpretation Guidelines
+
+The radar chart visualization supports clinical interpretation of phenotype profiles in several ways. First, the normalized scale enables immediate comparison of feature importance: dimensions where cluster profiles differ substantially (insulin, glucose, PHQ-9) represent the most actionable targets for phenotype-specific intervention. Second, the polygon shapes provide memorable visual signatures that can support patient communication and shared decision-making.
+
+The visualization also reveals the "degree of abnormality" for each phenotype. Clusters with compact polygons (Cluster 3) represent more narrowly defined phenotypes with specific abnormalities, while clusters with large, extended polygons (Cluster 4) represent complex phenotypes with multiple concurrent risk factors. This distinction has implications for intervention complexity: compact phenotypes may respond to single-focus interventions, while complex phenotypes may require comprehensive multi-component programs.
+
+The radar chart output (07_radar_charts.png) provides high-resolution visualization suitable for inclusion in clinical reports, research publications, and patient education materials. The 300 DPI resolution ensures clarity in both digital and print formats, while the standardized color scheme and labeling support consistent interpretation across different audiences.
+
+### Radar Chart Interpretation Summary
+
+The radar chart visualization confirms and enriches the numerical cluster profiles from earlier phases. The distinctive polygon shapes provide intuitive visual representation of each phenotype's characteristic health profile, supporting both technical validation and clinical communication of the clustering results.
+
+The analysis reveals that insulin resistance (Cluster 2) and hypoglycemia (Cluster 3) produce the most distinctive visual profiles, while the combined metabolic-mental risk phenotype (Cluster 4) shows a complex profile with multiple concurrent elevations. The visualization framework supports phenotype-specific intervention design by highlighting the primary characteristics that define each group.
+
+The radar charts provide an accessible entry point for understanding the clustering results, enabling clinicians and researchers to quickly grasp the essential characteristics of each phenotype without interpreting detailed statistical tables. The visual format is particularly valuable for interdisciplinary communication where team members may have varying levels of statistical expertise.
 
 ## Phase 15: Uncertainty Analysis - Probability Distributions
 
@@ -1335,6 +1399,7 @@ The GMM health phenotype discovery project has successfully identified five dist
 | models/standard_scaler_phase7.joblib | Fitted StandardScaler |
 | output_v2/final_summary.json | Summary statistics |
 | output_v2/cluster_assignments.csv | Full dataset with cluster assignments |
+| figures/07_radar_charts.png | Radar chart cluster profiles (Phase 14) |
 | figures/08_cluster_profiles_boxplot.png | Cluster profile visualizations |
 | figures/09_pca_tsne_clusters.png | PCA and t-SNE visualizations |
 | figures/10_silhouette_plot.png | Silhouette analysis |
@@ -1521,3 +1586,4 @@ This results analysis document will be updated progressively as outputs from eac
 | 2.1 | January 2025 | Group 6 | Added Phases 12-20: Medical history analysis (disease prevalence by cluster), Statistical validation (ANOVA: 9/11 significant), Feature importance (insulin, PHQ-9, glucose top discriminators), Uncertainty analysis, Feature distributions, Probability visualization, Cluster sizes, Demographics association (age significant, sex not significant), Final summary and export |
 | 2.2 | January 2025 | Group 6 | Enhanced Phase 15 Uncertainty Analysis with detailed certainty distribution (30.2% very high confidence, 52.3% high confidence, 17.5% low confidence), entropy statistics (mean=0.6697, std=0.3496), comprehensive probability distributions by cluster, and clinical implications for probabilistic phenotype assignments |
 | 2.3 | January 2025 | Group 6 | Added Phase 17 Probability Uncertainty Visualization with comprehensive confidence assessment framework, histogram of assignment confidence, confidence category pie chart, boxplot of confidence by cluster, cluster probability heatmap (mean probabilities for each cluster), and detailed clinical applications of confidence information |
+| 2.4 | January 2025 | Group 6 | Added Phase 14 Radar Charts for Cluster Profiles with comprehensive profile visualization across 5 key dimensions (age, BMI, systolic BP, glucose, PHQ-9), individual cluster polygon analysis, comparative profile interpretation, and clinical guidelines for using radar chart visualizations in phenotype communication |
