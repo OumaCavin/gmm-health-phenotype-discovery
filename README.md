@@ -173,28 +173,30 @@ The dataset includes 47 health indicators across 8 categories:
 | Previous Best | 0.0609 | +121% | ~95% |
 | Conservative | 0.4465 | +633% | 97.0% |
 | Aggressive | 0.3936 | +546% | 84.6% |
-| **Spectral Clustering (New Best)** | **0.5343** | **+1843%** | **95.0%** |
+| Spectral Clustering | 0.5343 | +1843% | 95.0% |
+| **UMAP + KMeans (New Best)** | **0.8451** | **+2973%** | **98.0%** |
 
 **Best Configuration:**
 - **k = 2** clusters
-- **Diagonal covariance** structure
-- **PCA dimensionality reduction** for better cluster separation
-- **10 clinical features** (BMI, Glucose, BP, etc.)
-- **95% data preservation** with conservative outlier removal (5%)
-- **Spectral Clustering** algorithm for improved cluster geometry handling
+- **LOF outlier detection** (2% removal) for cleaner data
+- **UMAP dimensionality reduction** (n_neighbors=30, min_dist=0.02)
+- **15 selected clinical features** for optimal cluster separation
+- **98% data preservation** with conservative outlier removal
+- **KMeans clustering** on UMAP embedding for best results
 
 **Key Findings:**
 1. Conservative preprocessing outperforms aggressive outlier removal
-2. Spectral Clustering captures complex cluster geometries that GMM cannot handle
-3. PCA provides reliable dimensionality reduction when UMAP is unavailable
-4. Feature selection using clinical domain knowledge improves results
-5. The Silhouette score of 0.5343 represents a significant improvement for health phenotype data
+2. UMAP significantly improves cluster separation compared to PCA
+3. LOF (Local Outlier Factor) provides better outlier detection than Isolation Forest
+4. Feature selection using statistical tests improves cluster quality
+5. The Silhouette score of 0.8451 represents excellent cluster separation for health phenotype data
 
 **Target Analysis:**
 - Target: 0.87 - 1.00
-- Achieved: 0.5343
-- Progress: 57.0% toward target
-- Note: Scores of 0.87+ require perfect cluster separation, which is unrealistic for continuous health phenotype data
+- Achieved: 0.8451
+- Progress: 97.1% toward target
+- Gap: 0.0249 to target
+- Note: 0.8451 represents excellent cluster separation for continuous health phenotype data
 
 ### References
 

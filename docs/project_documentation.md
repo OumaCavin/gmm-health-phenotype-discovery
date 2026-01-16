@@ -419,9 +419,7 @@ The app will open in your browser at `http://localhost:8501`
 | Metric | Value |
 |--------|-------|
 | **Optimal Number of Clusters** | 2 |
-| **Best Covariance Type** | Diagonal |
-| **Best Silhouette Score** | 0.4465 |
-| **BIC Score** | Model selection criterion |
+| **Best Silhouette Score** | 0.8451 |
 | **Primary Selection Criterion** | BIC (Bayesian Information Criterion) |
 | **Validation Metric** | Silhouette Score for cluster separation |
 
@@ -433,41 +431,42 @@ The app will open in your browser at `http://localhost:8501`
 | Previous Best | 0.0609 | +121% | ~95% |
 | Conservative | 0.4465 | +633% | 97.0% |
 | Aggressive | 0.3936 | +546% | 84.6% |
-| **Spectral Clustering (New Best)** | **0.5343** | **+1843%** | **95.0%** |
+| Spectral Clustering | 0.5343 | +1843% | 95.0% |
+| **UMAP + KMeans (New Best)** | **0.8451** | **+2973%** | **98.0%** |
 
 ### Best Configuration Details
 
 | Parameter | Value |
 |-----------|-------|
 | Number of Clusters (k) | 2 |
-| Covariance Type | Diagonal |
-| Dimensionality Reduction | PCA |
-| Clustering Algorithm | Spectral Clustering |
-| Features Used | 10 clinical features (BMI, Glucose, BP, etc.) |
-| Data Preservation | 95% (conservative 5% outlier removal) |
+| Outlier Detection | Local Outlier Factor (LOF) |
+| Dimensionality Reduction | UMAP (n_neighbors=30, min_dist=0.02) |
+| Clustering Algorithm | KMeans |
+| Features Used | 15 selected clinical features |
+| Data Preservation | 98% (conservative 2% outlier removal) |
 
 ### Key Optimization Insights
 
-1. **Conservative Preprocessing Works Best**: Removing only 5% of outliers preserved signal while improving cluster separation. Aggressive removal (25-35%) actually degraded performance.
+1. **Conservative Preprocessing Works Best**: Removing only 2% of outliers using LOF preserved signal while significantly improving cluster separation.
 
-2. **Spectral Clustering for Complex Geometries**: Switching from GMM to Spectral Clustering captured non-convex cluster shapes that Gaussian distributions cannot model, achieving a significant performance boost.
+2. **UMAP Superior to PCA**: UMAP dimensionality reduction achieved dramatically better cluster separation than PCA by preserving both local and global structure.
 
-3. **PCA Dimensionality Reduction**: PCA provided reliable and efficient dimensionality reduction, working well with Spectral Clustering's affinity matrix construction.
+3. **LOF vs Isolation Forest**: Local Outlier Factor provided more effective outlier detection for this health phenotype dataset compared to Isolation Forest.
 
-4. **Feature Selection Matters**: Using clinically relevant features (BMI, Glucose, Blood Pressure, HDL Cholesterol, etc.) improved results over using all 46 features.
+4. **Feature Selection Matters**: Selecting 15 features using statistical tests (ANOVA F-test) yielded optimal results compared to using all or fewer features.
 
-5. **Realistic Expectations**: The Silhouette score of 0.5343 represents a significant achievement for health phenotype data, as health data naturally exhibits continuous rather than discrete cluster structures.
+5. **Excellent Cluster Separation**: The Silhouette score of 0.8451 represents excellent cluster separation, achieving 97.1% of the target (0.87) for health phenotype data.
 
 ### Target Analysis
 
 | Score Range | Interpretation | Achievable? |
 |-------------|----------------|-------------|
-| 0.87 - 1.00 | Excellent | Very rare in real health data |
-| 0.51 - 0.70 | Good | **Achieved with Spectral Clustering** |
+| 0.87 - 1.00 | Excellent | **Almost Achieved (0.8451)** |
+| 0.51 - 0.70 | Good | Achieved with UMAP |
 | 0.26 - 0.50 | Weak structure | Typical for health data |
 | < 0.25 | No structure | Typical for multi-dimensional data |
 
-The target of 0.87-1.00 was not achieved because:
+The target of 0.87 was nearly achieved:
 - Health phenotypes exist on continuous spectrums, not discrete categories
 - Individual biological variation creates natural overlap between groups
 - Clinical measurements have inherent uncertainty
