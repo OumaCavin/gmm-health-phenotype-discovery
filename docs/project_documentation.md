@@ -431,8 +431,9 @@ The app will open in your browser at `http://localhost:8501`
 |----------|-----------------|-------------|----------------|
 | Original | 0.0275 | Baseline | 100% |
 | Previous Best | 0.0609 | +121% | ~95% |
-| **Conservative (Best)** | **0.4465** | **+633%** | **97.0%** |
+| Conservative | 0.4465 | +633% | 97.0% |
 | Aggressive | 0.3936 | +546% | 84.6% |
+| **Spectral Clustering (New Best)** | **0.5343** | **+1843%** | **95.0%** |
 
 ### Best Configuration Details
 
@@ -440,27 +441,30 @@ The app will open in your browser at `http://localhost:8501`
 |-----------|-------|
 | Number of Clusters (k) | 2 |
 | Covariance Type | Diagonal |
-| Dimensionality Reduction | UMAP |
+| Dimensionality Reduction | PCA |
+| Clustering Algorithm | Spectral Clustering |
 | Features Used | 10 clinical features (BMI, Glucose, BP, etc.) |
-| Data Preservation | 97% (conservative 5% outlier removal) |
+| Data Preservation | 95% (conservative 5% outlier removal) |
 
 ### Key Optimization Insights
 
 1. **Conservative Preprocessing Works Best**: Removing only 5% of outliers preserved signal while improving cluster separation. Aggressive removal (25-35%) actually degraded performance.
 
-2. **UMAP Superior to PCA**: UMAP dimensionality reduction achieved better cluster separation than raw features or PCA projections.
+2. **Spectral Clustering for Complex Geometries**: Switching from GMM to Spectral Clustering captured non-convex cluster shapes that Gaussian distributions cannot model, achieving a significant performance boost.
 
-3. **Feature Selection Matters**: Using clinically relevant features (BMI, Glucose, Blood Pressure, HDL Cholesterol, etc.) improved results over using all 46 features.
+3. **PCA Dimensionality Reduction**: PCA provided reliable and efficient dimensionality reduction, working well with Spectral Clustering's affinity matrix construction.
 
-4. **Realistic Expectations**: The Silhouette score of 0.4465 represents the realistic maximum for health phenotype data, as health data naturally exhibits continuous rather than discrete cluster structures.
+4. **Feature Selection Matters**: Using clinically relevant features (BMI, Glucose, Blood Pressure, HDL Cholesterol, etc.) improved results over using all 46 features.
+
+5. **Realistic Expectations**: The Silhouette score of 0.5343 represents a significant achievement for health phenotype data, as health data naturally exhibits continuous rather than discrete cluster structures.
 
 ### Target Analysis
 
 | Score Range | Interpretation | Achievable? |
 |-------------|----------------|-------------|
 | 0.87 - 1.00 | Excellent | Very rare in real health data |
-| 0.51 - 0.70 | Good | Possible with curated features |
-| **0.26 - 0.50** | **Weak structure** | **Achieved - Typical for health data** |
+| 0.51 - 0.70 | Good | **Achieved with Spectral Clustering** |
+| 0.26 - 0.50 | Weak structure | Typical for health data |
 | < 0.25 | No structure | Typical for multi-dimensional data |
 
 The target of 0.87-1.00 was not achieved because:

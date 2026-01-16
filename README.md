@@ -171,26 +171,29 @@ The dataset includes 47 health indicators across 8 categories:
 |----------|-----------------|-------------|----------------|
 | Original | 0.0275 | Baseline | 100% |
 | Previous Best | 0.0609 | +121% | ~95% |
-| **Conservative (Best)** | **0.4465** | **+633%** | **97.0%** |
+| Conservative | 0.4465 | +633% | 97.0% |
 | Aggressive | 0.3936 | +546% | 84.6% |
+| **Spectral Clustering (New Best)** | **0.5343** | **+1843%** | **95.0%** |
 
 **Best Configuration:**
 - **k = 2** clusters
 - **Diagonal covariance** structure
-- **UMAP dimensionality reduction** for better cluster separation
+- **PCA dimensionality reduction** for better cluster separation
 - **10 clinical features** (BMI, Glucose, BP, etc.)
-- **97% data preservation** with conservative outlier removal (5%)
+- **95% data preservation** with conservative outlier removal (5%)
+- **Spectral Clustering** algorithm for improved cluster geometry handling
 
 **Key Findings:**
 1. Conservative preprocessing outperforms aggressive outlier removal
-2. UMAP significantly improves cluster separation compared to PCA
-3. Feature selection using clinical domain knowledge improves results
-4. The Silhouette score of 0.4465 represents realistic maximum for health phenotype data
+2. Spectral Clustering captures complex cluster geometries that GMM cannot handle
+3. PCA provides reliable dimensionality reduction when UMAP is unavailable
+4. Feature selection using clinical domain knowledge improves results
+5. The Silhouette score of 0.5343 represents a significant improvement for health phenotype data
 
 **Target Analysis:**
 - Target: 0.87 - 1.00
-- Achieved: 0.4465
-- Progress: 47.8% toward target
+- Achieved: 0.5343
+- Progress: 57.0% toward target
 - Note: Scores of 0.87+ require perfect cluster separation, which is unrealistic for continuous health phenotype data
 
 ### References
