@@ -1,0 +1,15 @@
+{
+  "best_silhouette": 0.3936484754085541,
+  "best_k": 2,
+  "best_covariance": "diag",
+  "best_umap_params": {
+    "n_neighbors": 5,
+    "min_dist": 0.0
+  },
+  "samples_preserved": 4232,
+  "features_used": 3,
+  "previous_best": 0.0609,
+  "improvement": 0.33274847540855407,
+  "target_achieved": false,
+  "timestamp": "2026-01-16T13:40:33.964529"
+}
