@@ -1,0 +1,38 @@
+{
+  "optimal_k": 3,
+  "covariance_type": "tied",
+  "silhouette_score": 0.06093669099122479,
+  "calinski_harabasz_score": 310.0872770341726,
+  "davies_bouldin_score": 3.4980438837301135,
+  "bic_score": 168026.29618279042,
+  "aic_score": 167270.30177258613,
+  "n_features_used": 12,
+  "features_used": [
+    "bmi",
+    "waist_circumference_cm",
+    "systolic_bp_mmHg",
+    "diastolic_bp_mmHg",
+    "hdl_cholesterol_mg_dL",
+    "fasting_glucose_mg_dL",
+    "total_cholesterol_mg_dL",
+    "ldl_cholesterol_mg_dL",
+    "insulin_uU_mL",
+    "phq9_total_score",
+    "general_health_rating",
+    "age"
+  ],
+  "n_samples": 5000,
+  "pca_components": 12,
+  "high_confidence_pct": 52.22,
+  "mean_entropy": 0.3752645272431639,
+  "cluster_sizes": {
+    "0": 1352,
+    "1": 1654,
+    "2": 1994
+  },
+  "confidence_distribution": {
+    "high": 2611,
+    "moderate": 2385,
+    "low": 4
+  }
+}
