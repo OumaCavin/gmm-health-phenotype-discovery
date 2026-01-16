@@ -1,0 +1,53 @@
+{
+  "best_silhouette": 0.5343416926903343,
+  "best_method": "spectral_gmm_combo",
+  "best_k": 2,
+  "best_covariance": "N/A",
+  "top_5_results": [
+    {
+      "method": "spectral_gmm_combo",
+      "sil": 0.5343416926903343
+    },
+    {
+      "method": "gmm",
+      "sil": 0.5343416926903343
+    },
+    {
+      "method": "gmm",
+      "sil": 0.5343416926903343
+    },
+    {
+      "method": "gmm",
+      "sil": 0.5343416926903343
+    },
+    {
+      "method": "gmm",
+      "sil": 0.5343416926903343
+    }
+  ],
+  "single_feature_analysis": [
+    {
+      "feature": "sex",
+      "approx_sil": 1.0
+    },
+    {
+      "feature": "moderate_work_activity",
+      "approx_sil": 1.0
+    },
+    {
+      "feature": "vigorous_recreation_activity",
+      "approx_sil": 1.0
+    },
+    {
+      "feature": "stroke",
+      "approx_sil": 0.9715201464097527
+    },
+    {
+      "feature": "angina_pectoris",
+      "approx_sil": 0.9693171588955795
+    }
+  ],
+  "previous_best": 0.0609,
+  "improvement": 0.47344169269033426,
+  "timestamp": "2026-01-16T14:23:18.258724"
+}
