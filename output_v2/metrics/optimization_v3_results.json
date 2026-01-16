@@ -1,0 +1,49 @@
+{
+  "previous_best": 0.5343,
+  "new_best": 0.5067796833731483,
+  "improvement_percent": -5.150723680863134,
+  "configuration": {
+    "dimensionality_reduction": "Isomap",
+    "n_components": 5,
+    "clustering_method": "KMeans",
+    "n_clusters": 2
+  },
+  "all_results": [
+    {
+      "dim_method": "PCA",
+      "n_components": 5,
+      "cluster_method": "KMeans",
+      "n_clusters": 2,
+      "score": 0.15517186427887175
+    },
+    {
+      "dim_method": "PCA",
+      "n_components": 8,
+      "cluster_method": "KMeans",
+      "n_clusters": 2,
+      "score": 0.10301130895967253
+    },
+    {
+      "dim_method": "PCA",
+      "n_components": 10,
+      "cluster_method": "KMeans",
+      "n_clusters": 2,
+      "score": 0.0864546852731958
+    },
+    {
+      "dim_method": "Isomap",
+      "n_components": 5,
+      "cluster_method": "KMeans",
+      "n_clusters": 2,
+      "score": 0.5067796833731483
+    },
+    {
+      "dim_method": "Isomap",
+      "n_components": 8,
+      "cluster_method": "KMeans",
+      "n_clusters": 2,
+      "score": 0.44496546754581356
+    }
+  ],
+  "timestamp": "2026-01-16T14:35:57.831045"
+}
