@@ -1,27 +1,118 @@
-# GMM Health Phenotype Discovery - Requirements
+# GMM Health Phenotype Discovery - Python Environment Requirements
 # MSc Public Health Data Science - SDS6217 Advanced Machine Learning
+# Python Version: 3.12.3
+
+# ============================================================================
+# CORE DATA SCIENCE STACK
+# ============================================================================
 
 # Core scientific computing
-numpy>=1.21.0
-pandas>=1.3.0
-scipy>=1.7.0
+numpy>=1.26.0
+pandas>=2.1.0
+scipy>=1.11.0
 
-# Visualization
-matplotlib>=3.4.0
-seaborn>=0.11.0
-plotly>=5.0.0
+# ============================================================================
+# MACHINE LEARNING
+# ============================================================================
 
-# Machine Learning
-scikit-learn>=1.0.0
+# Primary ML framework
+scikit-learn>=1.3.0
 
-# Notebook support
+# Dimensionality reduction
+umap-learn>=0.5.4
+
+# Optional: Advanced ML
+# xgboost>=2.0.0        # Gradient boosting for validation
+# lightgbm>=4.0.0       # Alternative gradient boosting
+
+# ============================================================================
+# VISUALIZATION
+# ============================================================================
+
+# Static visualizations
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Interactive visualizations (optional)
+# plotly>=5.18.0
+# altair>=5.0.0
+
+# ============================================================================
+# NOTEBOOK AND INTERACTIVE COMPUTING
+# ============================================================================
+
+# Jupyter ecosystem
 jupyter>=1.0.0
-ipykernel>=6.0.0
-ipython>=7.0.0
+notebook>=7.0.0
+ipython>=8.18.0
+ipykernel>=6.25.0
+nbformat>=5.9.0
+nbconvert>=7.10.0
+jupytext>=1.15.0  # For notebook conversion/synchronization
 
-# Utilities
-joblib>=1.0.0
-openpyxl>=3.0.0
+# ============================================================================
+# UTILITIES AND SUPPORT
+# ============================================================================
 
-# Web Application
-streamlit>=1.28.0
+# Parallel processing
+joblib>=1.3.0
+
+# Data I/O
+openpyxl>=3.1.0     # Excel support
+xlrd>=2.0.0         # Legacy Excel support
+
+# Progress tracking (optional)
+# tqdm>=4.66.0
+
+# ============================================================================
+# INSTALLATION INSTRUCTIONS
+# ============================================================================
+#
+# Method 1: Using pip (recommended)
+# --------------------------------
+# 1. Create virtual environment:
+#    python -m venv venv
+#
+# 2. Activate environment:
+#    Windows:  venv\Scripts\activate
+#    Linux/Mac: source venv/bin/activate
+#
+# 3. Install packages:
+#    pip install -r requirements.txt
+#
+# 4. Launch notebook:
+#    jupyter notebook GMM_Health_Phenotype_Discovery_Optimized.ipynb
+#
+# Method 2: Using conda
+# ---------------------
+# 1. Create environment:
+#    conda create -n health_phenotype python=3.12.3
+#
+# 2. Activate:
+#    conda activate health_phenotype
+#
+# 3. Install:
+#    conda install numpy pandas scipy matplotlib seaborn scikit-learn
+#    conda install -c conda-forge umap-learn jupyter
+#
+# 4. Run:
+#    jupyter notebook
+#
+# ============================================================================
+# SYSTEM REQUIREMENTS
+# ============================================================================
+#
+# Minimum:
+# - 8GB RAM
+# - 2GB disk space
+# - Modern CPU (multi-core recommended)
+#
+# Recommended:
+# - 16GB+ RAM
+# - SSD storage
+# - Multi-core CPU
+#
+# Note: Some packages may require C++ compilers for optimal performance
+# Windows: Visual Studio Build Tools with C++ support
+# Linux:   sudo apt-get install build-essential
+# Mac:     Xcode command line tools
