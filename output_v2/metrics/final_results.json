@@ -1,0 +1,10 @@
+{
+  "best_silhouette": 0.35064634680747986,
+  "best_k": 2,
+  "best_covariance": "tied",
+  "best_features": "fasting_glucose_mg_dL + systolic_bp_mmHg",
+  "samples": 3500,
+  "previous_best": 0.0609,
+  "improvement": 0.28974634680747985,
+  "timestamp": "2026-01-16T13:53:39.643669"
+}
