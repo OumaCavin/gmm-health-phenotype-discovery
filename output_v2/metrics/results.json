@@ -1,0 +1,7 @@
+{
+  "best_silhouette": 0.03909956592996379,
+  "best_k": 3,
+  "best_covariance": "diag",
+  "samples": 3750,
+  "features": 46
+}
